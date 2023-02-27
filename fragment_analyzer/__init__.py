@@ -26,5 +26,5 @@ __all__ = [
     "PeakArea",
     "PlotPeakArea",
     "PlotRawData",
-    "generate_report"
+    "generate_report",
 ]

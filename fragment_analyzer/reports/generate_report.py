@@ -19,7 +19,6 @@ def generate_report(report_type: str, fsa_file: str, ladder: str, folder: str) -
             print("No support")
 
 
-
 def header(
     text: str,
     bg_color: str = "#04c273",
@@ -140,10 +139,8 @@ def generate_peak_area_no_peaks(name, plot_raw):
     )
 
 
-
-def peak_area_report(fsa_file: str,ladder: str, folder: str) -> None:
-    """
-    """
+def peak_area_report(fsa_file: str, ladder: str, folder: str) -> None:
+    """ """
     fsa = fragment_analyzer.FsaFile(fsa_file, ladder)
     file_name = fsa.file_name
     ladder_assigner = fragment_analyzer.PeakLadderAssigner(fsa)
@@ -161,9 +158,7 @@ def peak_area_report(fsa_file: str,ladder: str, folder: str) -> None:
     # If no peaks could be found
     if not peak_areas.found_peaks:
         outname = outpath / f"FAILED-fragment_analysis-report-{file_name}.html"
-        generate_peak_area_no_peaks(file_name, raw_plots).save(
-            outname, title=file_name
-        )
+        generate_peak_area_no_peaks(file_name, raw_plots).save(outname, title=file_name)
 
     else:
         outname = outpath / f"fragment_analysis-report-{file_name}.html"

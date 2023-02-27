@@ -18,24 +18,48 @@ class FsaFile:
         min_height: int = None,
         max_ladder_trace_distance: int = None,
     ) -> None:
+        """
+        Constructs an FsaFile object with the given parameters.
+
+        Args:
+            file (str): The path to the sequencing file.
+            ladder (str): The name of the ladder used for sequencing.
+            normalize (bool): Whether to normalize the data using the arPLS algorithm.
+            trace_channel (str): The channel to extract the trace data from.
+            size_standard_channel (str): The channel to extract the size standard data from.
+            min_interpeak_distance (int): The minimum distance between peaks in the ladder.
+            min_height (int): The minimum height of peaks in the ladder.
+            max_ladder_trace_distance (int): The maximum distance between the ladder and the trace.
+
+        Returns:
+            None
+        """
         peak_count_padding = 3
         self.file = Path(file)
         self.file_name = self.file.parts[-1]
 
+        # Extract data from the sequencing file
         self.fsa = SeqIO.read(file, "abi").annotations["abif_raw"]
         self.ladder = ladder
         self.trace_channel = trace_channel
         self.normalize = normalize
 
+        # Extract data from the ladder reference
         self.ref_sizes = LADDERS[ladder]["sizes"]
         self.ref_count = self.ref_sizes.size
-        
+
+        # Use default values if necessary
         self.size_standard_channel = size_standard_channel or LADDERS[ladder]["channel"]
-        self.min_interpeak_distance =  min_interpeak_distance or LADDERS[ladder]["distance"]
-        self.min_height =  min_height or LADDERS[ladder]["height"]
-        self.max_ladder_trace_distance = max_ladder_trace_distance or LADDERS[ladder]["max_ladder_trace_distance"]
+        self.min_interpeak_distance = (
+            min_interpeak_distance or LADDERS[ladder]["distance"]
+        )
+        self.min_height = min_height or LADDERS[ladder]["height"]
+        self.max_ladder_trace_distance = (
+            max_ladder_trace_distance or LADDERS[ladder]["max_ladder_trace_distance"]
+        )
         self.max_peak_count = self.ref_count + peak_count_padding
 
+        # Normalize data if requested
         if normalize:
             self.size_standard = np.array(
                 baseline_arPLS(self.fsa[self.size_standard_channel])
@@ -46,7 +70,13 @@ class FsaFile:
             self.trace = np.array(self.fsa[trace_channel])
 
     def __repr__(self):
-        representer = f"""
+        """
+        Returns a string representation of the FsaFile object.
+
+        Returns:
+            str: A string representation of the object.
+        """
+        return f"""
             FsaFile-object with following parameters:
             
             File: {self.file}
@@ -62,4 +92,3 @@ class FsaFile:
             Trace Channel: {self.trace_channel}
             Ladder Sizes: {self.ref_sizes}
             """
-        return representer

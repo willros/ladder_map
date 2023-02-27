@@ -14,6 +14,15 @@ from fragment_analyzer.utils.fsa_file import FsaFile
 
 class FitLadderModel:
     def __init__(self, ladder_assigner: PeakLadderAssigner):
+        """
+        Initialize FitLadderModel object with ladder_assigner object and its attributes.
+
+        Args:
+            ladder_assigner (PeakLadderAssigner): Object of PeakLadderAssigner class.
+
+        Returns:
+            None.
+        """
         self.ladder_assigner = ladder_assigner
         self.fsa_file = self.ladder_assigner.fsa_file
         self.best_combination = ladder_assigner.assign_ladder_peak_sizes().reshape(
@@ -25,6 +34,12 @@ class FitLadderModel:
         self.adjusted_baisepair_df = self.generate_adjusted_trace_df()
 
     def fit_model(self):
+        """
+        Fit model based on ladder type.
+
+        Returns:
+            None.
+        """
         match self.fsa_file.ladder:
             case "ROX":
                 self._fit_ROX_ladder()
@@ -34,7 +49,12 @@ class FitLadderModel:
                 print("Ladder not found")
 
     def model_score(self):
+        """
+        Calculate mean squared error and R-squared score of the fitted model.
 
+        Returns:
+            Tuple (mse, r2).
+        """
         true_Y = self.fsa_file.ref_sizes
         predicted_Y = self.model.predict(self.best_combination)
         mse = mean_squared_error(true_Y, predicted_Y)
@@ -43,7 +63,12 @@ class FitLadderModel:
         return mse, r2
 
     def generate_adjusted_trace_df(self):
+        """
+        Generate a dataframe with adjusted basepairs and peaks.
 
+        Returns:
+            Dataframe with columns time, peaks and basepairs.
+        """
         df = (
             pd.DataFrame({"peaks": self.fsa_file.trace})
             .reset_index()
@@ -57,7 +82,12 @@ class FitLadderModel:
         return df
 
     def _fit_ROX_ladder(self):
+        """
+        Fit model with ROX ladder.
 
+        Returns:
+            None.
+        """
         self.model = make_pipeline(
             SplineTransformer(degree=4, n_knots=6, extrapolation="continue"),
             LinearRegression(fit_intercept=True),
@@ -69,7 +99,12 @@ class FitLadderModel:
         self.model.fit(X, y)
 
     def _fit_LIZ_ladder(self):
+        """
+        Fit model with LIZ ladder.
 
+        Returns:
+            None.
+        """
         self.model = make_pipeline(
             SplineTransformer(degree=3, n_knots=3, extrapolation="continue"),
             LinearRegression(fit_intercept=True),
