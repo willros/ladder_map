@@ -13,9 +13,9 @@ from fragment_analyzer.utils.fsa_file import FsaFile
 
 
 class FitLadderModel:
-    def __init__(self, fsa_file: FsaFile, ladder_assigner: PeakLadderAssigner):
-        self.fsa_file = fsa_file
+    def __init__(self, ladder_assigner: PeakLadderAssigner):
         self.ladder_assigner = ladder_assigner
+        self.fsa_file = self.ladder_assigner.fsa_file
         self.best_combination = ladder_assigner.assign_ladder_peak_sizes().reshape(
             -1, 1
         )

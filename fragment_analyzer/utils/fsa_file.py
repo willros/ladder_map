@@ -13,6 +13,10 @@ class FsaFile:
         ladder: str,
         normalize: bool = False,
         trace_channel: str = "DATA1",
+        size_standard_channel: str = None,
+        min_interpeak_distance: int = None,
+        min_height: int = None,
+        max_ladder_trace_distance: int = None,
     ) -> None:
         peak_count_padding = 3
         self.file = Path(file)
@@ -23,13 +27,14 @@ class FsaFile:
         self.trace_channel = trace_channel
         self.normalize = normalize
 
-        self.size_standard_channel = LADDERS[ladder]["channel"]
         self.ref_sizes = LADDERS[ladder]["sizes"]
         self.ref_count = self.ref_sizes.size
-        self.min_interpeak_distance = LADDERS[ladder]["distance"]
-        self.min_height = LADDERS[ladder]["height"]
-        self.max_ladder_trace_distance = LADDERS[ladder]["max_ladder_trace_distance"]
-        self.max_peak_count = self.ref_sizes.size + peak_count_padding
+        
+        self.size_standard_channel = size_standard_channel or LADDERS[ladder]["channel"]
+        self.min_interpeak_distance =  min_interpeak_distance or LADDERS[ladder]["distance"]
+        self.min_height =  min_height or LADDERS[ladder]["height"]
+        self.max_ladder_trace_distance = max_ladder_trace_distance or LADDERS[ladder]["max_ladder_trace_distance"]
+        self.max_peak_count = self.ref_count + peak_count_padding
 
         if normalize:
             self.size_standard = np.array(
