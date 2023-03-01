@@ -16,7 +16,7 @@ def generate_report(report_type: str, fsa_file: str, ladder: str, folder: str) -
         case "peak_area_report":
             peak_area_report(fsa_file, ladder, folder)
         case _:
-            print("No support")
+            print(f"No support for '{report_type}'. Choose between: ['peak_area_report']")
 
 
 def header(
@@ -144,7 +144,7 @@ def peak_area_report(fsa_file: str, ladder: str, folder: str) -> None:
     fsa = fragment_analyzer.FsaFile(fsa_file, ladder)
     file_name = fsa.file_name
     ladder_assigner = fragment_analyzer.PeakLadderAssigner(fsa)
-    model = fragment_analyzer.FitLadderModel(fsa, ladder_assigner)
+    model = fragment_analyzer.FitLadderModel(ladder_assigner)
     raw_plots = fragment_analyzer.PlotRawData(model)
     ladder_plots = fragment_analyzer.PlotLadder(model)
     peak_areas = fragment_analyzer.PeakArea(model, peak_finding_model="gauss")

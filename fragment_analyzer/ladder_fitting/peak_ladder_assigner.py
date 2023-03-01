@@ -30,7 +30,7 @@ class PeakLadderAssigner:
     _max_spline_second_derivative_score(combination): Returns a score based on the maximum spline second derivative.
     """
 
-    def __init__(self, fsa_file=FsaFile) -> None:
+    def __init__(self, fsa_file: FsaFile) -> None:
         """
         Initializes the class with an object of the FsaFile class.
 

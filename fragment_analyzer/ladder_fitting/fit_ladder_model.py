@@ -13,7 +13,7 @@ from fragment_analyzer.utils.fsa_file import FsaFile
 
 
 class FitLadderModel:
-    def __init__(self, ladder_assigner: PeakLadderAssigner):
+    def __init__(self, ladder_assigner: PeakLadderAssigner) -> None:
         """
         Initialize FitLadderModel object with ladder_assigner object and its attributes.
 
@@ -33,7 +33,7 @@ class FitLadderModel:
         self.mse, self.r2 = self.model_score()
         self.adjusted_baisepair_df = self.generate_adjusted_trace_df()
 
-    def fit_model(self):
+    def fit_model(self) -> None:
         """
         Fit model based on ladder type.
 
@@ -48,7 +48,7 @@ class FitLadderModel:
             case _:
                 print("Ladder not found")
 
-    def model_score(self):
+    def model_score(self) -> tuple[float, float]:
         """
         Calculate mean squared error and R-squared score of the fitted model.
 
@@ -62,7 +62,7 @@ class FitLadderModel:
 
         return mse, r2
 
-    def generate_adjusted_trace_df(self):
+    def generate_adjusted_trace_df(self) -> pd.DataFrame:
         """
         Generate a dataframe with adjusted basepairs and peaks.
 
@@ -81,7 +81,7 @@ class FitLadderModel:
 
         return df
 
-    def _fit_ROX_ladder(self):
+    def _fit_ROX_ladder(self) -> None:
         """
         Fit model with ROX ladder.
 
@@ -98,7 +98,7 @@ class FitLadderModel:
 
         self.model.fit(X, y)
 
-    def _fit_LIZ_ladder(self):
+    def _fit_LIZ_ladder(self) -> None:
         """
         Fit model with LIZ ladder.
 
