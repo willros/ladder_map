@@ -1,5 +1,6 @@
 import panel as pn
 from pathlib import Path
+import datetime
 
 import fragment_analyzer
 
@@ -22,7 +23,7 @@ def generate_report(report_type: str, fsa_file: str, ladder: str, folder: str) -
 def header(
     text: str,
     bg_color: str = "#04c273",
-    height: int = 150,
+    height: int = 300,
     fontsize: str = "px20",
     textalign: str = "center",
 ):
@@ -45,15 +46,16 @@ def header(
     )
 
 
-def generate_peak_area_report(name: str, plot_raw, plot_ladder, plot_peaks, peak_area):
+def generate_peak_area_report(name: str, date: str, plot_raw, plot_ladder, plot_peaks, peak_area):
     head = header(
         text=f"""
         # Fragment Analysis Report
-        ## Report of {name}
+        ## Report of {name} 
+        ## Date: {date}
         """,
         fontsize="20px",
         bg_color="#03a1fc",
-        height=185,
+        height=250,
     )
     ### ----- Raw Data plot ----- ###
     raw_data_markdown = header("# Raw Data plot", height=100)
@@ -117,15 +119,16 @@ def generate_peak_area_report(name: str, plot_raw, plot_ladder, plot_peaks, peak
     )
 
 
-def generate_peak_area_no_peaks(name, plot_raw):
+def generate_peak_area_no_peaks(name, date, plot_raw):
     head = header(
         text=f"""
         # Fragment Analysis Report
         ## Report of {name}
+        ## Date: {date}
         """,
         fontsize="20px",
         bg_color="#03a1fc",
-        height=185,
+        height=250,
     )
 
     no_peaks_markdown = header(
@@ -143,6 +146,9 @@ def peak_area_report(fsa_file: str, ladder: str, folder: str) -> None:
     """ """
     fsa = fragment_analyzer.FsaFile(fsa_file, ladder)
     file_name = fsa.file_name
+    date = fsa.fsa["ABID1"].decode("utf-8")
+    date = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S.%f").strftime("%Y-%m-%d")
+
     ladder_assigner = fragment_analyzer.PeakLadderAssigner(fsa)
     model = fragment_analyzer.FitLadderModel(ladder_assigner)
     raw_plots = fragment_analyzer.PlotRawData(model)
@@ -157,11 +163,11 @@ def peak_area_report(fsa_file: str, ladder: str, folder: str) -> None:
 
     # If no peaks could be found
     if not peak_areas.found_peaks:
-        outname = outpath / f"FAILED-fragment_analysis-report-{file_name}.html"
-        generate_peak_area_no_peaks(file_name, raw_plots).save(outname, title=file_name)
+        outname = outpath / f"FAILED-fragment_analysis-report-{file_name}-{date}.html"
+        generate_peak_area_no_peaks(file_name, date, raw_plots).save(outname, title=file_name)
 
     else:
-        outname = outpath / f"fragment_analysis-report-{file_name}.html"
+        outname = outpath / f"fragment_analysis-report-{file_name}-{date}.html"
         generate_peak_area_report(
-            file_name, raw_plots, ladder_plots, peak_plots, peak_areas
+            file_name, date, raw_plots, ladder_plots, peak_plots, peak_areas
         ).save(outname, title=file_name)
