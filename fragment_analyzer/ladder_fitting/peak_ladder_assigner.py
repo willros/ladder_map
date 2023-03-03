@@ -76,8 +76,8 @@ class PeakLadderAssigner:
 
         df = pd.DataFrame({"peaks": peaks, "heights": heights})
 
-        idxmax = df["heights"].idxmax()
-        df = df.drop(idxmax)
+        #idxmax = df["heights"].idxmax()
+        #df = df.drop(idxmax)
 
         peaks_adj = df.nlargest(self.fsa_file.max_peak_count, ["heights"])
 
