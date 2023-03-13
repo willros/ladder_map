@@ -76,6 +76,8 @@ class PeakLadderAssigner:
 
         df = pd.DataFrame({"peaks": peaks, "heights": heights})
 
+        # TODO
+        # Dropped the below, then it worked with the new test files
         #idxmax = df["heights"].idxmax()
         #df = df.drop(idxmax)
 
