@@ -171,7 +171,7 @@ class PeakArea:
 
         # if there only is 1 peak, return 1
         if len(areas) == 1:
-            self.quotient = 1.0
+            self.quotient = 0
             return
 
         # if there only are 2 peaks, return the quotient
@@ -207,4 +207,7 @@ class PeakArea:
             )
             dataframes.append(df)
 
-        return pd.concat(dataframes).assign(quotient=self.quotient)
+        return pd.concat(dataframes).assign(
+            quotient=self.quotient,
+            peak_number=lambda x: x.shape[0]
+        )

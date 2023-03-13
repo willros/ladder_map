@@ -9,13 +9,13 @@ pn.extension("vega", sizing_mode="stretch_width", template="fast")
 pn.widgets.Tabulator.theme = "modern"
 
 
-def generate_report(report_type: str, fsa_file: str, ladder: str, folder: str) -> None:
+def generate_report(report_type: str, fsa_file: str, ladder: str, folder: str, peak_model: str) -> None:
     """
     Generates the report
     """
     match report_type:
         case "peak_area_report":
-            peak_area_report(fsa_file, ladder, folder)
+            peak_area_report(fsa_file, ladder, folder, peak_model=peak_model)
         case _:
             print(f"No support for '{report_type}'. Choose between: ['peak_area_report']")
 
@@ -142,7 +142,7 @@ def generate_peak_area_no_peaks(name, date, plot_raw):
     )
 
 
-def peak_area_report(fsa_file: str, ladder: str, folder: str) -> None:
+def peak_area_report(fsa_file: str, ladder: str, folder: str, peak_model: str) -> None:
     """ """
     fsa = fragment_analyzer.FsaFile(fsa_file, ladder)
     file_name = fsa.file_name
@@ -153,7 +153,7 @@ def peak_area_report(fsa_file: str, ladder: str, folder: str) -> None:
     model = fragment_analyzer.FitLadderModel(ladder_assigner)
     raw_plots = fragment_analyzer.PlotRawData(model)
     ladder_plots = fragment_analyzer.PlotLadder(model)
-    peak_areas = fragment_analyzer.PeakArea(model, peak_finding_model="gauss")
+    peak_areas = fragment_analyzer.PeakArea(model, peak_finding_model=peak_model)
     peak_plots = fragment_analyzer.PlotPeakArea(peak_areas)
 
     # create the output folder if it doesn't exist
