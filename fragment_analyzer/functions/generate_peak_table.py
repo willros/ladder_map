@@ -33,4 +33,4 @@ def generate_peak_table(folder: str, ladder: str, peak_model: str) -> pd.DataFra
         except:
             print(f"FAILED: {fsa.file_name}")
 
-    return pd.concat(peak_dfs)
+    return pd.concat(peak_dfs).reset_index(drop=True)
