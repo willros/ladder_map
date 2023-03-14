@@ -2,6 +2,7 @@ import pandas as pd
 from pathlib import Path
 import fragment_analyzer
 
+
 def generate_peak_table(folder: str, ladder: str, peak_model: str) -> pd.DataFrame:
     """
     Generates a combined dataframe of all peaks for files in the given folder.
@@ -13,9 +14,9 @@ def generate_peak_table(folder: str, ladder: str, peak_model: str) -> pd.DataFra
 
     The function reads all the .fsa files in the folder, and generates a combined dataframe
     of all the peaks detected in each file using the specified ladder and peak model.
-    
+
     ############ Example usage ############
-    
+
     peak_df = generate_peak_table(
         folder="my_folder", ladder="LIZ", peak_model="gauss"
     )

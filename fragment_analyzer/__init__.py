@@ -12,10 +12,12 @@ from fragment_analyzer.plotting.plot_ladder import PlotLadder
 from fragment_analyzer.utils.baseline_removal import baseline_arPLS
 from fragment_analyzer.utils.fsa_file import FsaFile
 from fragment_analyzer.applications.peak_area import PeakArea
+from fragment_analyzer.applications.peak_area_multiplex import PeakAreaDeMultiplex, PeakAreaMultiplex
 from fragment_analyzer.plotting.plot_peak_area import PlotPeakArea
 from fragment_analyzer.plotting.plot_raw_data import PlotRawData
 from fragment_analyzer.reports.generate_report import generate_report
 from fragment_analyzer.functions.generate_peak_table import generate_peak_table
+
 
 __all__ = [
     "FitLadderModel",
@@ -25,6 +27,8 @@ __all__ = [
     "baseline_arPLS",
     "FsaFile",
     "PeakArea",
+    "PeakAreaDemultiplex",
+    "PeakAreaMultiplex",
     "PlotPeakArea",
     "PlotRawData",
     "generate_report",

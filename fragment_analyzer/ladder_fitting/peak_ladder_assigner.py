@@ -78,8 +78,8 @@ class PeakLadderAssigner:
 
         # TODO
         # Dropped the below, then it worked with the new test files
-        #idxmax = df["heights"].idxmax()
-        #df = df.drop(idxmax)
+        # idxmax = df["heights"].idxmax()
+        # df = df.drop(idxmax)
 
         peaks_adj = df.nlargest(self.fsa_file.max_peak_count, ["heights"])
 

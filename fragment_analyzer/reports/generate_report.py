@@ -9,7 +9,9 @@ pn.extension("vega", sizing_mode="stretch_width", template="fast")
 pn.widgets.Tabulator.theme = "modern"
 
 
-def generate_report(report_type: str, fsa_file: str, ladder: str, folder: str, peak_model: str) -> None:
+def generate_report(
+    report_type: str, fsa_file: str, ladder: str, folder: str, peak_model: str
+) -> None:
     """
     Generates the report
     """
@@ -17,7 +19,9 @@ def generate_report(report_type: str, fsa_file: str, ladder: str, folder: str, p
         case "peak_area_report":
             peak_area_report(fsa_file, ladder, folder, peak_model=peak_model)
         case _:
-            print(f"No support for '{report_type}'. Choose between: ['peak_area_report']")
+            print(
+                f"No support for '{report_type}'. Choose between: ['peak_area_report']"
+            )
 
 
 def header(
@@ -46,7 +50,9 @@ def header(
     )
 
 
-def generate_peak_area_report(name: str, date: str, plot_raw, plot_ladder, plot_peaks, peak_area):
+def generate_peak_area_report(
+    name: str, date: str, plot_raw, plot_ladder, plot_peaks, peak_area
+):
     head = header(
         text=f"""
         # Fragment Analysis Report
@@ -164,7 +170,9 @@ def peak_area_report(fsa_file: str, ladder: str, folder: str, peak_model: str) -
     # If no peaks could be found
     if not peak_areas.found_peaks:
         outname = outpath / f"FAILED-fragment_analysis-report-{file_name}-{date}.html"
-        generate_peak_area_no_peaks(file_name, date, raw_plots).save(outname, title=file_name)
+        generate_peak_area_no_peaks(file_name, date, raw_plots).save(
+            outname, title=file_name
+        )
 
     else:
         outname = outpath / f"fragment_analysis-report-{file_name}-{date}.html"
