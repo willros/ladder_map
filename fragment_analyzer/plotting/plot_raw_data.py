@@ -15,4 +15,5 @@ class PlotRawData:
         plt.xlabel("Basepairs")
         plt.ylabel("Intensity")
 
+        plt.close()
         return fig

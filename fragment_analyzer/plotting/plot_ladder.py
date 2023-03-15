@@ -28,6 +28,7 @@ class PlotLadder:
         for peak, ladder in zip(best_combination, ladder_size):
             plt.text(peak, trace[peak], ladder)
 
+        plt.close()
         return fig_ladder_peaks
 
     @property
@@ -54,4 +55,5 @@ class PlotLadder:
         plt.legend(["True value", "Predicted value"])
         plt.grid()
 
+        plt.close()
         return fig_model_fit

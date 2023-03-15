@@ -7,7 +7,6 @@ class PlotPeakArea:
     def __init__(self, peak_area: PeakArea):
         self.peak_area = peak_area
 
-    @property
     def plot_peaks(self):
         fig_peaks = plt.figure(figsize=(20, 10))
 
@@ -33,11 +32,13 @@ class PlotPeakArea:
         plt.ylabel("intensity")
         plt.xlabel("basepairs")
         plt.grid()
+        plt.close()
 
         return fig_peaks
 
-    @property
-    def plot_areas(self):
+    def plot_areas(self, peak_finding_model: str,assay_number: int):
+        
+        self.peak_area.fit_assay_peaks(peak_finding_model, assay_number)
 
         fig_areas, axs = plt.subplots(
             1, len(self.peak_area.fit_df), sharey=True, figsize=(20, 10)
@@ -75,5 +76,6 @@ class PlotPeakArea:
         fig_areas.legend(["Raw data", "Model"])
         fig_areas.supxlabel("basepairs")
         fig_areas.supylabel("intensity")
+        plt.close()
 
         return fig_areas
