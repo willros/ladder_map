@@ -5,7 +5,67 @@ from lmfit.models import VoigtModel, GaussianModel, LorentzianModel
 from fragment_analyzer.ladder_fitting.fit_ladder_model import FitLadderModel
 
 
+class PeakAreaDeMultiplexIterator:
+    def __init__(self, number_of_assays):
+        self.number_of_assays = number_of_assays
+        self.current = 0
+        
+    def __next__(self):
+        if self.current >= self.number_of_assays:
+            raise StopIteration
+        else:
+            result = self.current
+            self.current += 1
+            return result
+
+
 class PeakAreaDeMultiplex:
+    """
+    Class for finding peak areas and quotients of peaks in a given data set.
+
+    Parameters:
+    -----------
+    model: FitLadderModel
+        A FitLadderModel object containing the data set to be analyzed.
+    peak_finding_model: str
+        The name of the peak-finding model to be used.
+    min_ratio: float, optional (default=0.2)
+        The minimum ratio of peak height to highest peak height required to consider a peak as valid.
+    search_peaks_start: int, optional (default=50)
+        The starting point in basepairs for the search for peaks.
+
+    Attributes:
+    -----------
+    model: FitLadderModel
+        A FitLadderModel object containing the data set to be analyzed.
+    raw_data: pd.DataFrame
+        The raw data from the FitLadderModel object.
+    file_name: str
+        The name of the file associated with the FitLadderModel object.
+    search_peaks_start: int
+        The starting point in basepairs for the search for peaks.
+    found_peaks: bool
+        A flag indicating whether any peaks were found.
+    peaks_index: np.ndarray
+        An array of the indices of the peaks found.
+    peaks_dataframe: pd.DataFrame
+        A DataFrame of the peaks found, with basepairs and peak heights.
+    peak_information: pd.DataFrame
+        A DataFrame of the peaks found, with basepairs, peak heights, ratios, and peak names.
+    peak_widths: pd.DataFrame
+        A DataFrame of the peaks found, with basepairs, peak heights, start and end indices, and peak names.
+    divided_peaks: List[pd.DataFrame]
+        A list of DataFrames, each containing a single peak and its associated data.
+    fit_df: List[pd.DataFrame]
+        A list of DataFrames, each containing the raw data and the best-fit curve for a single peak.
+    fit_params: List[dict]
+        A list of dictionaries, each containing the parameters of the best-fit curve for a single peak.
+    fit_report: List[str]
+        A list of strings, each containing the report of the best-fit curve for a single peak.
+    quotient: float
+        The quotient of the areas of the peaks, calculated as the last peak divided by the mean of the peaks to the left of it.
+    """
+
     def __init__(
         self,
         model: FitLadderModel,
@@ -18,6 +78,9 @@ class PeakAreaDeMultiplex:
         self.raw_data = self.model.adjusted_baisepair_df
         self.file_name = self.model.fsa_file.file_name
         self.search_peaks_start = search_peaks_start
+        
+        # for iteration
+        self.current = 0
 
         # find peaks
         self.find_peaks_agnostic(
@@ -47,6 +110,10 @@ class PeakAreaDeMultiplex:
             # Print information to the user
             print(f"{self.peak_information.shape[0]} peaks found in {self.file_name}")
             print(f"{self.number_of_assays} assays in {self.file_name}")
+            
+    def __iter__(self):
+        return PeakAreaDeMultiplexIterator(self.number_of_assays)
+    
 
     def find_peaks_agnostic(
         self,
@@ -137,7 +204,8 @@ class PeakAreaDeMultiplex:
         else:
             raise NotImplementedError(
                 f"""
-                {peak_finding_model} is not implemented! Options: [gauss, voigt, lorentzian]
+                {peak_finding_model} is not implemented! 
+                Options: [gauss, voigt, lorentzian]
                 """
             )
 
@@ -208,7 +276,6 @@ class PeakAreaDeMultiplex:
             assay_number=assay_number + 1,
         )
 
-    # TODO add method to integrate fit_lm_model and quoitient
     def fit_assay_peaks(self, peak_finding_model: str, assay_number: int) -> None:
         """
         Runs fit_lmfit_model, calculate_quotient and peak_position_area_dataframe
