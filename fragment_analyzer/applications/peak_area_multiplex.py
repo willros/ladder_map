@@ -36,7 +36,6 @@ class PeakAreaDeMultiplex:
 
         # if peaks are found
         if self.found_peaks:
-            print(f"{self.peak_information.shape[0]} peaks found in {self.file_name}")
             # find peak widths
             self.find_peak_widths()
             # divade peaks based on their assay they belonging
@@ -45,6 +44,9 @@ class PeakAreaDeMultiplex:
             self.number_of_assays = len(self.divided_assays)
             # divide all peaks in each assay into separate dataframes
             self.divided_peaks = [self.divide_peaks(x) for x in self.divided_assays]
+            # Print information to the user
+            print(f"{self.peak_information.shape[0]} peaks found in {self.file_name}")
+            print(f"{self.number_of_assays} assays in {self.file_name}")
 
     def find_peaks_agnostic(
         self,
@@ -116,38 +118,33 @@ class PeakAreaDeMultiplex:
             for x in assay.itertuples()
         ]
 
+    def fit_lmfit_model(self, peak_finding_model: str, assay_number: int):
+        if assay_number >= self.number_of_assays:
+            raise IndexError(
+                f"""
+                The sample only contains {self.number_of_assays} assays. 
+                Use a number inside of the range.
+                Indexing starts at 0.
+                """
+            )
 
-class PeakAreaMultiplex:
-    def __init__(
-        self,
-        demultiplexed: PeakAreaDeMultiplex,
-        peak_finding_model: str,
-        assay_number: int,
-    ) -> None:
-        self.demultiplexed = demultiplexed
-        self.divided_peaks = self.demultiplexed.divided_peaks[assay_number]
-        self.fit_df, self.fit_params, self.fit_report = self.fit_lmfit_model(
-            model_=peak_finding_model
-        )
-        # calculate quotient
-        self.calculate_quotient()
-
-    def fit_lmfit_model(self, model_: str):
-        if model_ == "gauss":
+        if peak_finding_model == "gauss":
             model = GaussianModel()
-        elif model_ == "voigt":
+        elif peak_finding_model == "voigt":
             model = VoigtModel()
-        elif model_ == "lorentzian":
+        elif peak_finding_model == "lorentzian":
             model = LorentzianModel()
         else:
             raise NotImplementedError(
-                f"{model_} is not implemented! Options: [gauss, voigt, lorentzian]"
+                f"""
+                {peak_finding_model} is not implemented! Options: [gauss, voigt, lorentzian]
+                """
             )
 
-        fitted_df = []
-        fitted_parameters = []
-        fitted_report = []
-        for df in self.divided_peaks:
+        fit_df = []
+        fit_params = []
+        fit_report = []
+        for df in self.divided_peaks[assay_number]:
             df = df.copy()
             y = df.peaks.to_numpy()
             x = df.basepairs.to_numpy()
@@ -155,16 +152,19 @@ class PeakAreaMultiplex:
             params = model.guess(y, x)
             out = model.fit(y, params, x=x)
 
-            fitted_df.append(df.assign(fitted=out.best_fit, model=model_))
-            fitted_parameters.append(out.values)
-            fitted_report.append(out.fit_report())
+            fit_df.append(df.assign(fitted=out.best_fit, model=peak_finding_model))
+            fit_params.append(out.values)
+            fit_report.append(out.fit_report())
 
-        return fitted_df, fitted_parameters, fitted_report
+        # Update the instances of the model fit
+        self.fit_df = fit_df
+        self.fit_params = fit_params
+        self.fit_report = fit_report
 
     def calculate_quotient(self):
         areas = np.array([x["amplitude"] for x in self.fit_params])
 
-        # if there only is 1 peak, return 1
+        # if there only is 1 peak, return 0
         if len(areas) == 1:
             self.quotient = 0
             return
@@ -174,11 +174,11 @@ class PeakAreaMultiplex:
             self.quotient = areas[1] / areas[0]
             return
 
+        # TODO change this to the proper assay
         # return the last peak divided by the mean of the peaks to the left of it
         self.quotient = areas[-1] / areas[:-1].mean()
 
-    @property
-    def peak_position_area_dataframe(self) -> pd.DataFrame:
+    def peak_position_area_dataframe(self, assay_number: int) -> pd.DataFrame:
         """
         Returns a DataFrame of each peak and its properties
         """
@@ -198,10 +198,21 @@ class PeakAreaMultiplex:
                     }
                 )
                 .drop_duplicates("peak_name")
-                .assign(file_name=self.demultiplexed.file_name)
+                .assign(file_name=self.file_name)
             )
             dataframes.append(df)
 
-        return pd.concat(dataframes).assign(
-            quotient=self.quotient, peak_number=lambda x: x.shape[0]
+        self.assay_peak_area_df = pd.concat(dataframes).assign(
+            quotient=self.quotient,
+            peak_number=lambda x: x.shape[0],
+            assay_number=assay_number + 1,
         )
+
+    # TODO add method to integrate fit_lm_model and quoitient
+    def fit_assay_peaks(self, peak_finding_model: str, assay_number: int) -> None:
+        """
+        Runs fit_lmfit_model, calculate_quotient and peak_position_area_dataframe
+        """
+        self.fit_lmfit_model(peak_finding_model, assay_number)
+        self.calculate_quotient()
+        self.peak_position_area_dataframe(assay_number)
