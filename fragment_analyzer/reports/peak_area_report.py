@@ -71,6 +71,7 @@ def peak_area_report(
     peak_model: str,
     min_height: int = 100,
     min_ratio: float = 0.1,
+    trace_channel: str = "DATA1"
 ) -> int:
     """
     Generates an HTML report for the fragment analysis of an FSA file, including peak area data and plots.
@@ -101,7 +102,12 @@ def peak_area_report(
         If the report file cannot be saved.
     """
     # FSA File and FsaFile Object
-    fsa = fragment_analyzer.FsaFile(fsa_file, ladder, min_height=min_height)
+    fsa = fragment_analyzer.FsaFile(
+        fsa_file,
+        ladder, 
+        min_height=min_height,
+        trace_channel=trace_channel,
+    )
     file_name = fsa.file_name
     date = fsa.fsa["ABID1"].decode("utf-8")
     date = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S.%f").strftime("%Y-%m-%d")
