@@ -79,9 +79,6 @@ class PeakAreaDeMultiplex:
         self.file_name = self.model.fsa_file.file_name
         self.search_peaks_start = search_peaks_start
         
-        # for iteration
-        self.current = 0
-
         # find peaks
         self.find_peaks_agnostic(
             peak_height=peak_height,

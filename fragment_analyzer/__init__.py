@@ -15,7 +15,8 @@ from fragment_analyzer.applications.peak_area import PeakArea
 from fragment_analyzer.applications.peak_area_multiplex import PeakAreaDeMultiplex
 from fragment_analyzer.plotting.plot_peak_area import PlotPeakArea
 from fragment_analyzer.plotting.plot_raw_data import PlotRawData
-from fragment_analyzer.reports.generate_report import generate_report
+#from fragment_analyzer.reports.generate_report import generate_report
+from fragment_analyzer.reports.peak_area_report import peak_area_report
 from fragment_analyzer.functions.generate_peak_table import generate_peak_table
 
 
@@ -33,4 +34,5 @@ __all__ = [
     "PlotRawData",
     "generate_report",
     "generate_peak_table",
+    "peak_area_report",
 ]
