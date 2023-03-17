@@ -69,6 +69,7 @@ def peak_area_report(
     ladder: str,
     folder: str, 
     peak_model: str,
+    min_interpeak_distance: int = 30,
     min_height: int = 100,
     min_ratio: float = 0.1,
     trace_channel: str = "DATA1"
@@ -107,6 +108,7 @@ def peak_area_report(
         ladder, 
         min_height=min_height,
         trace_channel=trace_channel,
+        min_interpeak_distance=min_interpeak_distance,
     )
     file_name = fsa.file_name
     date = fsa.fsa["ABID1"].decode("utf-8")
