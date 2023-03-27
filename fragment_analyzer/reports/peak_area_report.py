@@ -72,7 +72,9 @@ def peak_area_report(
     min_interpeak_distance: int = 30,
     min_height: int = 100,
     min_ratio: float = 0.1,
-    trace_channel: str = "DATA1"
+    trace_channel: str = "DATA1",
+    search_peaks_start: int = 100,
+    cutoff: float = None,
 ) -> int:
     """
     Generates an HTML report for the fragment analysis of an FSA file, including peak area data and plots.
@@ -122,6 +124,7 @@ def peak_area_report(
     peak_areas = fragment_analyzer.PeakAreaDeMultiplex(
         model, 
         min_ratio=min_ratio,
+        search_peaks_start=search_peaks_start,
     )
     peak_plots = fragment_analyzer.PlotPeakArea(peak_areas)
 
@@ -154,6 +157,7 @@ def peak_area_report(
         ladder_plots,
         peak_plots, 
         peak_areas,
+        cutoff=cutoff,
     ).save(
         outname,
         title=file_name,
@@ -170,6 +174,7 @@ def generate_peak_area_report(
     plot_ladder,
     plot_peaks, 
     peak_area,
+    cutoff,
 ):
     ### ----- HEADER ----- ###
     head = header(
@@ -268,7 +273,7 @@ def generate_peak_area_report(
     # Create dataframe
     df = []
     for i in peak_area:
-        peak_area.fit_assay_peaks(peak_model, i)
+        peak_area.fit_assay_peaks(peak_model, i, cutoff=cutoff)
         df.append(peak_area.assay_peak_area_df)
 
     df = pd.concat(df).reset_index(drop=True)

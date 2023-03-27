@@ -226,14 +226,20 @@ class PeakAreaDeMultiplex:
         self.fit_params = fit_params
         self.fit_report = fit_report
 
-    def calculate_quotient(self, right_by_left: bool = True) -> None:
+    def calculate_quotient(
+        self, 
+        cutoff: float | int = None
+    ) -> None:
+        
         """
         :Params:
-        right_by_left: bool = True
-            If there are two peaks, which one should be divided by which to give
-            the quotient. Defaults to divide the right peak with the left peak. 
         """
         areas = np.array([x["amplitude"] for x in self.fit_params])
+        
+        right_by_left = True
+        if cutoff is not None:
+            if pd.concat(self.fit_df).basepairs.mean() < cutoff:
+                right_by_left = False
 
         # if there only is 1 peak, return 0
         if len(areas) == 1:
@@ -288,11 +294,11 @@ class PeakAreaDeMultiplex:
         self, 
         peak_finding_model: str,
         assay_number: int,
-        right_by_left: bool = True
+        cutoff: int | float = None
     ) -> None:
         """
         Runs fit_lmfit_model, calculate_quotient and peak_position_area_dataframe
         """
         self.fit_lmfit_model(peak_finding_model, assay_number)
-        self.calculate_quotient(right_by_left=right_by_left)
+        self.calculate_quotient(cutoff=cutoff)
         self.peak_position_area_dataframe(assay_number)
