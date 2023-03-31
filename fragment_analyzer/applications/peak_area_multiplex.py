@@ -73,11 +73,13 @@ class PeakAreaDeMultiplex:
         search_peaks_start: int = 50,
         peak_height: int = 500,
         distance_between_assays: int = 15,
+        cutoff: float = None
     ) -> None:
         self.model = model
         self.raw_data = self.model.adjusted_baisepair_df
         self.file_name = self.model.fsa_file.file_name
         self.search_peaks_start = search_peaks_start
+        self.cutoff = cutoff or None
         
         # find peaks
         self.find_peaks_agnostic(
@@ -228,7 +230,6 @@ class PeakAreaDeMultiplex:
 
     def calculate_quotient(
         self, 
-        cutoff: float | int = None
     ) -> None:
         
         """
@@ -237,8 +238,8 @@ class PeakAreaDeMultiplex:
         areas = np.array([x["amplitude"] for x in self.fit_params])
         
         right_by_left = True
-        if cutoff is not None:
-            if pd.concat(self.fit_df).basepairs.mean() < cutoff:
+        if self.cutoff is not None:
+            if pd.concat(self.fit_df).basepairs.mean() < self.cutoff:
                 right_by_left = False
 
         # if there only is 1 peak, return 0
@@ -294,11 +295,10 @@ class PeakAreaDeMultiplex:
         self, 
         peak_finding_model: str,
         assay_number: int,
-        cutoff: int | float = None
     ) -> None:
         """
         Runs fit_lmfit_model, calculate_quotient and peak_position_area_dataframe
         """
         self.fit_lmfit_model(peak_finding_model, assay_number)
-        self.calculate_quotient(cutoff=cutoff)
+        self.calculate_quotient()
         self.peak_position_area_dataframe(assay_number)

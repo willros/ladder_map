@@ -125,6 +125,7 @@ def peak_area_report(
         model, 
         min_ratio=min_ratio,
         search_peaks_start=search_peaks_start,
+        cutoff=cutoff,
     )
     peak_plots = fragment_analyzer.PlotPeakArea(peak_areas)
 
@@ -157,7 +158,6 @@ def peak_area_report(
         ladder_plots,
         peak_plots, 
         peak_areas,
-        cutoff=cutoff,
     ).save(
         outname,
         title=file_name,
@@ -174,7 +174,6 @@ def generate_peak_area_report(
     plot_ladder,
     plot_peaks, 
     peak_area,
-    cutoff,
 ):
     ### ----- HEADER ----- ###
     head = header(
@@ -273,7 +272,7 @@ def generate_peak_area_report(
     # Create dataframe
     df = []
     for i in peak_area:
-        peak_area.fit_assay_peaks(peak_model, i, cutoff=cutoff)
+        peak_area.fit_assay_peaks(peak_model, i)
         df.append(peak_area.assay_peak_area_df)
 
     df = pd.concat(df).reset_index(drop=True)

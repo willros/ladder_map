@@ -1,10 +1,10 @@
-from fragment_analyzer.applications.peak_area import PeakArea
+from fragment_analyzer.applications.peak_area_multiplex import PeakAreaDeMultiplex
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 class PlotPeakArea:
-    def __init__(self, peak_area: PeakArea):
+    def __init__(self, peak_area: PeakAreaDeMultiplex):
         self.peak_area = peak_area
 
     def plot_peaks(self):
@@ -26,9 +26,9 @@ class PlotPeakArea:
             self.peak_area.peak_information.basepairs,
             self.peak_area.peak_information.peaks,
         ):
-            plt.text(x, y, f"{round(x, 2)} bp")
+            plt.text(x, y, f"{round(x, 1)} bp")
 
-        plt.xticks(np.arange(df.basepairs.min(), df.basepairs.max(), 2), rotation=90)
+        plt.xticks(np.arange(df.basepairs.min(), df.basepairs.max(), 10), rotation=90)
         plt.ylabel("intensity")
         plt.xlabel("basepairs")
         plt.grid()
