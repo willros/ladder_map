@@ -70,7 +70,11 @@ class PeakAreaDeMultiplex:
         self,
         model: FitLadderModel,
         min_ratio: float = 0.15,
-        search_peaks_start: int = 50,
+        # TODO
+        # Change search_peaks_start to something else
+        search_peaks_start: int = 110,
+        # TODO
+        # Change the peak_height number to something else? 
         peak_height: int = 500,
         distance_between_assays: int = 15,
         cutoff: float = None
@@ -126,10 +130,9 @@ class PeakAreaDeMultiplex:
         peaks_index, _ = find_peaks(peaks_dataframe.peaks, height=peak_height)
 
         peak_information = (
-            peaks_dataframe.iloc[peaks_index]
+            peaks_dataframe
+            .iloc[peaks_index]
             .assign(peaks_index=peaks_index)
-            .assign(ratio=lambda x: x.peaks / x.peaks.max())
-            .loc[lambda x: x.ratio > min_ratio]
             .assign(peak_name=lambda x: range(1, x.shape[0] + 1))
             # separate the peaks into different assay groups depending on the distance
             # between the peaks
@@ -143,7 +146,35 @@ class PeakAreaDeMultiplex:
                 )
             )
             .fillna(method="ffill")
+            .assign(
+                max_peak=lambda x: x.groupby("assay")["peaks"]
+                .transform(np.max)
+            )
+            .assign(ratio=lambda x: x.peaks / x.max_peak)
+            .loc[lambda x: x.ratio > min_ratio]
+            .assign(peak_name=lambda x: range(1, x.shape[0] + 1))
         )
+        # TODO
+        # Remove old
+        #peak_information = (
+        #    peaks_dataframe.iloc[peaks_index]
+        #    .assign(peaks_index=peaks_index)
+        #    .assign(ratio=lambda x: x.peaks / x.peaks.max())
+        #    .loc[lambda x: x.ratio > min_ratio]
+        #    .assign(peak_name=lambda x: range(1, x.shape[0] + 1))
+        #    # separate the peaks into different assay groups depending on the distance
+        #    # between the peaks
+        #    .assign(difference=lambda x: x.basepairs.diff())
+        #    .fillna(100)
+        #    .assign(
+        #        assay=lambda x: np.select(
+        #            [x.difference > distance_between_assays],
+        #           [x.peak_name * 10],
+        #            default=pd.NA,
+        #        )
+        #    )
+        #    .fillna(method="ffill")
+        #)
 
         # update peaks_index based on the above filtering
         peaks_index = peak_information.peaks_index.to_numpy()
