@@ -113,8 +113,7 @@ def peak_area_report(
         min_interpeak_distance=min_interpeak_distance,
     )
     file_name = fsa.file_name
-    date = fsa.fsa["ABID1"].decode("utf-8")
-    date = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S.%f").strftime("%Y-%m-%d")
+    date = fsa.fsa["RUND1"]
 
     # LadderAssigner, Model and PeakArea
     ladder_assigner = fragment_analyzer.PeakLadderAssigner(fsa)
