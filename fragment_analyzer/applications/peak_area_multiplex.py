@@ -75,7 +75,7 @@ class PeakAreaDeMultiplex:
         search_peaks_start: int = 110,
         # TODO
         # Change the peak_height number to something else? 
-        peak_height: int = 500,
+        peak_height: int = 350,
         distance_between_assays: int = 15,
         cutoff: float = None
     ) -> None:
