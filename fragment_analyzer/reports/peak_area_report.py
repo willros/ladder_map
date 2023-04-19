@@ -63,11 +63,154 @@ def generate_peak_area_no_peaks(name, date, plot_raw):
     )
 
 
-## ------ NEW ------ ###
+def generate_peak_area_report(
+    name: str,
+    date: str,
+    peak_model: str,
+    plot_raw,
+    plot_ladder,
+    plot_peaks,
+    peak_area,
+):
+    ### ----- HEADER ----- ###
+    head = header(
+        text=f"""
+        # Fragment Analysis Report
+        ## Report of {name} 
+        ## Date: {date}
+        """,
+        fontsize="20px",
+        bg_color="#03a1fc",
+        height=250,
+    )
+    ### ----- Raw Data ----- ###
+
+    # Header for this section
+    raw_header = header(
+        text=f"## Plot of Raw Data",
+        bg_color="#04c273",
+        height=80,
+        textalign="left",
+    )
+    # PLOT
+    raw_data_plot = pn.pane.Matplotlib(
+        plot_raw.plot_raw_data,
+        name="Raw Data",
+    )
+
+    # Section
+    raw_tab = pn.Tabs(
+        raw_data_plot,
+    )
+    raw_section = pn.Column(raw_header, raw_tab)
+
+    ### ----- Ladder Information ----- ###
+
+    # Header for this section
+    ladder_header = header(
+        text=f"## Information about the ladder",
+        bg_color="#04c273",
+        height=80,
+        textalign="left",
+    )
+    # Ladder peak plot
+    ladder_peak_plot = pn.pane.Matplotlib(
+        plot_ladder.plot_ladder_peaks,
+        name="Ladder Peak Plot",
+    )
+    # Ladder Correlation
+    ladder_correlation_plot = pn.pane.Matplotlib(
+        plot_ladder.plot_model_fit,
+        name="Ladder Correlation Plot",
+    )
+
+    # Section
+    ladder_tab = pn.Tabs(
+        ladder_peak_plot,
+        ladder_correlation_plot,
+    )
+    ladder_section = pn.Column(ladder_header, ladder_tab)
+
+    ### ----- Peaks Information ----- ###
+    # Header for this section
+    peaks_header = header(
+        text=f"## Information about the peaks",
+        bg_color="#04c273",
+        height=80,
+        textalign="left",
+    )
+
+    # All peaks plot
+    all_peaks_plot = pn.pane.Matplotlib(
+        plot_peaks.plot_peaks(),
+        name="All Peaks",
+    )
+
+    # Individual peaks and fitting of the model for assays in sample
+    # append all_peaks_plot first
+    peaks_tab = pn.Tabs(all_peaks_plot)
+    for assay in peak_area:
+        plot = plot_peaks.plot_areas(peak_model, assay)
+        name = f"Assay {assay + 1}"
+        plot_pane = pn.pane.Matplotlib(plot, name=name)
+        peaks_tab.append(plot_pane)
+
+    # Section
+    peaks_section = pn.Column(peaks_header, peaks_tab)
+
+    ### ----- Peaks DataFrame ----- ###
+    # Header for this section
+    dataframe_header = header(
+        text=f"## Peaks Table",
+        bg_color="#04c273",
+        height=80,
+        textalign="left",
+    )
+    # Create dataframe
+    df = []
+    for i in peak_area:
+        peak_area.fit_assay_peaks(peak_model, i)
+        df.append(peak_area.assay_peak_area_df)
+
+    df = pd.concat(df).reset_index(drop=True)
+
+    # DataFrame Tabulator
+    peaks_df_tab = pn.widgets.Tabulator(
+        df,
+        # editors={"sequence": {"type": "editable", "value": False}},
+        layout="fit_columns",
+        pagination="local",
+        page_size=15,
+        show_index=False,
+        name="Peaks Table",
+    )
+
+    # Section
+    dataframe_tab = pn.Tabs(peaks_df_tab)
+    dataframe_section = pn.Column(dataframe_header, dataframe_tab)
+
+    ### CREATE REPORT ###
+
+    all_tabs = pn.Tabs(
+        ("Raw Data", raw_section),
+        ("Ladder Information", ladder_section),
+        ("Peaks", peaks_section),
+        ("Table", dataframe_section),
+        tabs_location="left",
+    )
+    report = pn.Column(
+        head,
+        pn.layout.Divider(),
+        all_tabs,
+    )
+
+    return report
+
+
 def peak_area_report(
-    fsa_file: str, 
+    fsa_file: str,
     ladder: str,
-    folder: str, 
+    folder: str,
     peak_model: str,
     min_interpeak_distance: int = 30,
     min_height: int = 100,
@@ -107,7 +250,7 @@ def peak_area_report(
     # FSA File and FsaFile Object
     fsa = fragment_analyzer.FsaFile(
         fsa_file,
-        ladder, 
+        ladder,
         min_height=min_height,
         trace_channel=trace_channel,
         min_interpeak_distance=min_interpeak_distance,
@@ -121,7 +264,7 @@ def peak_area_report(
     raw_plots = fragment_analyzer.PlotRawData(model)
     ladder_plots = fragment_analyzer.PlotLadder(model)
     peak_areas = fragment_analyzer.PeakAreaDeMultiplex(
-        model, 
+        model,
         min_ratio=min_ratio,
         search_peaks_start=search_peaks_start,
         cutoff=cutoff,
@@ -136,13 +279,8 @@ def peak_area_report(
     # If no peaks could be found
     if not peak_areas.found_peaks:
         outname = outpath / f"FAILED-fragment_analysis-report-{file_name}-{date}.html"
-        generate_peak_area_no_peaks(
-            file_name, 
-            date, 
-            raw_plots
-        ).save(
-            outname,
-            title=file_name
+        generate_peak_area_no_peaks(file_name, date, raw_plots).save(
+            outname, title=file_name
         )
 
         return 1
@@ -150,12 +288,12 @@ def peak_area_report(
     # If peaks
     outname = outpath / f"fragment_analysis-report-{file_name}-{date}.html"
     generate_peak_area_report(
-        file_name, 
-        date, 
+        file_name,
+        date,
         peak_model,
-        raw_plots, 
+        raw_plots,
         ladder_plots,
-        peak_plots, 
+        peak_plots,
         peak_areas,
     ).save(
         outname,
@@ -163,151 +301,3 @@ def peak_area_report(
     )
 
     return 0
-
-
-def generate_peak_area_report(
-    name: str,
-    date: str,
-    peak_model: str,
-    plot_raw, 
-    plot_ladder,
-    plot_peaks, 
-    peak_area,
-):
-    ### ----- HEADER ----- ###
-    head = header(
-        text=f"""
-        # Fragment Analysis Report
-        ## Report of {name} 
-        ## Date: {date}
-        """,
-        fontsize="20px",
-        bg_color="#03a1fc",
-        height=250,
-    )
-    ### ----- Raw Data ----- ### 
-    
-    # Header for this section
-    raw_header = header(
-        text=f"## Plot of Raw Data",
-        bg_color="#04c273",
-        height=80,
-        textalign="left",
-    )
-    # PLOT
-    raw_data_plot = pn.pane.Matplotlib(
-        plot_raw.plot_raw_data, 
-        name="Raw Data",
-    )
-    
-    # Section
-    raw_tab = pn.Tabs(
-        raw_data_plot,
-    )
-    raw_section = pn.Column(raw_header, raw_tab)
-    
-    ### ----- Ladder Information ----- ### 
-    
-    # Header for this section
-    ladder_header = header(
-        text=f"## Information about the ladder",
-        bg_color="#04c273",
-        height=80,
-        textalign="left",
-    )
-    # Ladder peak plot
-    ladder_peak_plot = pn.pane.Matplotlib(
-        plot_ladder.plot_ladder_peaks,
-        name="Ladder Peak Plot",
-    )
-    # Ladder Correlation
-    ladder_correlation_plot = pn.pane.Matplotlib(
-        plot_ladder.plot_model_fit,
-        name="Ladder Correlation Plot",
-    )
-    
-    # Section
-    ladder_tab = pn.Tabs(
-        ladder_peak_plot, ladder_correlation_plot,
-    )
-    ladder_section = pn.Column(ladder_header, ladder_tab)
-    
-    ### ----- Peaks Information ----- ### 
-    # Header for this section
-    peaks_header = header(
-        text=f"## Information about the peaks",
-        bg_color="#04c273",
-        height=80,
-        textalign="left",
-    )
-    
-    # All peaks plot
-    all_peaks_plot = pn.pane.Matplotlib(
-        plot_peaks.plot_peaks(),
-        name="All Peaks",
-    )
-    
-    # Individual peaks and fitting of the model for assays in sample
-    # append all_peaks_plot first
-    peaks_tab = pn.Tabs(all_peaks_plot)
-    for assay in peak_area:
-        plot = plot_peaks.plot_areas(peak_model, assay)
-        name = f"Assay {assay + 1}"
-        plot_pane = pn.pane.Matplotlib(plot, name=name)
-        peaks_tab.append(plot_pane)
-    
-    # Section
-    peaks_section = pn.Column(peaks_header, peaks_tab)
-    
-    
-    ### ----- Peaks DataFrame ----- ### 
-    # Header for this section
-    dataframe_header = header(
-        text=f"## Peaks Table",
-        bg_color="#04c273",
-        height=80,
-        textalign="left",
-    )
-    # Create dataframe
-    df = []
-    for i in peak_area:
-        peak_area.fit_assay_peaks(peak_model, i)
-        df.append(peak_area.assay_peak_area_df)
-
-    df = pd.concat(df).reset_index(drop=True)
-
-    # DataFrame Tabulator
-    peaks_df_tab = pn.widgets.Tabulator(
-    df,
-    #editors={"sequence": {"type": "editable", "value": False}},
-    layout="fit_columns",
-    pagination="local",
-    page_size=15,
-    show_index=False,
-    name="Peaks Table",
-)
-    
-    # Section
-    dataframe_tab = pn.Tabs(
-        peaks_df_tab
-    )
-    dataframe_section = pn.Column(dataframe_header, dataframe_tab)
-    
-    ### CREATE REPORT ###
-
-    all_tabs = pn.Tabs(
-        ("Raw Data", raw_section),
-        ("Ladder Information", ladder_section),
-        ("Peaks", peaks_section),
-        ("Table", dataframe_section),
-        tabs_location="left",
-    )
-    report = pn.Column(
-        head,
-        pn.layout.Divider(),
-        all_tabs,
-    )
-    
-    return report
-
-
