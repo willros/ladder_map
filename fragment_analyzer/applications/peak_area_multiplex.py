@@ -154,27 +154,6 @@ class PeakAreaDeMultiplex:
             .loc[lambda x: x.ratio > min_ratio]
             .assign(peak_name=lambda x: range(1, x.shape[0] + 1))
         )
-        # TODO
-        # Remove old
-        #peak_information = (
-        #    peaks_dataframe.iloc[peaks_index]
-        #    .assign(peaks_index=peaks_index)
-        #    .assign(ratio=lambda x: x.peaks / x.peaks.max())
-        #    .loc[lambda x: x.ratio > min_ratio]
-        #    .assign(peak_name=lambda x: range(1, x.shape[0] + 1))
-        #    # separate the peaks into different assay groups depending on the distance
-        #    # between the peaks
-        #    .assign(difference=lambda x: x.basepairs.diff())
-        #    .fillna(100)
-        #    .assign(
-        #        assay=lambda x: np.select(
-        #            [x.difference > distance_between_assays],
-        #           [x.peak_name * 10],
-        #            default=pd.NA,
-        #        )
-        #    )
-        #    .fillna(method="ffill")
-        #)
 
         # update peaks_index based on the above filtering
         peaks_index = peak_information.peaks_index.to_numpy()
@@ -333,3 +312,11 @@ class PeakAreaDeMultiplex:
         self.fit_lmfit_model(peak_finding_model, assay_number)
         self.calculate_quotient()
         self.peak_position_area_dataframe(assay_number)
+        return self.assay_peak_area_df
+    
+    
+    def assays_dataframe(self, peak_finding_model: str = "gauss"):
+        dfs = []
+        for i in self:
+            dfs.append(self.fit_assay_peaks(peak_finding_model, i))
+        return pd.concat(dfs, ignore_index=True)

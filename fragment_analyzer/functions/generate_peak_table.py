@@ -3,7 +3,13 @@ from pathlib import Path
 import fragment_analyzer
 
 
-def generate_peak_table(folder: str, ladder: str, peak_model: str) -> pd.DataFrame:
+def generate_peak_table(
+    folder: str, 
+    ladder: str, 
+    peak_model: str,
+    min_height: int = 100,
+    cutoff: int = 175,
+) -> pd.DataFrame:
     """
     Generates a combined dataframe of all peaks for files in the given folder.
 
@@ -26,11 +32,11 @@ def generate_peak_table(folder: str, ladder: str, peak_model: str) -> pd.DataFra
     peak_dfs = []
     for x in files:
         try:
-            fsa = fragment_analyzer.FsaFile(x, ladder)
+            fsa = fragment_analyzer.FsaFile(x, ladder, min_height=min_height)
             pla = fragment_analyzer.PeakLadderAssigner(fsa)
             model = fragment_analyzer.FitLadderModel(pla)
-            pa = fragment_analyzer.PeakArea(model, peak_model)
-            peak_dfs.append(pa.peak_position_area_dataframe)
+            pam = fragment_analyzer.PeakAreaDeMultiplex(model, cutoff=cutoff)
+            peak_dfs.append(pam.assays_dataframe(peak_model))
         except:
             print(f"FAILED: {fsa.file_name}")
 

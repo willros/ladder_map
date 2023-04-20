@@ -39,6 +39,7 @@ peak_area = PeakArea(
 
 peak_area.plot_peak_widths()
 ```
+
 #### Output
 ![peak_area](examples/peak_area.png)
 
@@ -99,29 +100,75 @@ Normalized peaks:
 #### Output
 ![normalized](examples/normalized.png)
 
-#### Generate report:
+
+## Usage: peak_area_report
+
+The `peak_area_report` function generates an HTML report for the fragment analysis of an FSA file, including peak area data and plots.
+
+### Parameters:
+
+- `fsa_file` (str): The path to the FSA file to be analyzed.
+- `ladder` (str): The name of the ladder used in the FSA file.
+- `folder` (str): The path to the output folder where the report will be saved.
+- `peak_model` (str): The peak finding model used to identify peaks.
+- `min_interpeak_distance` (int, optional, default=30): Minimum distance between peaks.
+- `min_height` (int, optional, default=100): Minimum peak height for inclusion in the analysis.
+- `min_ratio` (float, optional, default=0.1): Minimum peak area ratio for multiplexing.
+- `trace_channel` (str, optional, default="DATA1"): The trace channel in the FSA file.
+- `search_peaks_start` (int, optional, default=100): The starting point for peak search.
+- `cutoff` (float, optional): Cutoff value for peak area de-multiplexing.
+
+### Returns:
+
+- An integer representing the status of the report generation:
+  - 0 if successful
+  - 1 if no peaks were found
+
+### Raises:
+
+- FileNotFoundError: If the specified FSA file cannot be found.
+- IOError: If the report file cannot be saved.
+
+### Example usage:
+
 ```python
-from fragment_analyzer import LadderMap, PeakArea, generate_report
-
-data = "demo/4062_Dx/3_PRT_2_4062_C02_Dx.fsa"
-laddermap = LadderMap(data, normalize_peaks=False)
-peak_area = PeakArea(
-    laddermap.adjusted_step_dataframe(channel="DATA1"),
-    start=200, 
-    end=250,
-    num_peaks=2,
-    padding=2,
-    model="gauss"
+result = peak_area_report(
+    fsa_file="path/to/fsa_file.fsa",
+    ladder="LIZ",
+    folder="output_folder",
+    peak_model="gauss"
 )
-
-generate_report(laddermap, peak_area, name="my_folder/my-report")
 ```
-The report is saves in `my_folder` as `my-report.html`.
-An example report can be found in `examples`
+This example will generate an HTML report for the fragment analysis of the specified FSA file, using the LIZ ladder and a Gaussian peak model. The report will be saved in the output_folder directory.
 
-# TODO
-* output excel or csv with peak area, position of peak and height
-* make agnostic algorithm of how many peaks one expects
+
+## Usage: generate_peak_table
+
+The `generate_peak_table` function generates a combined dataframe of all peaks for .fsa files in the given folder, using the specified ladder and peak model.
+
+### Parameters:
+
+- `folder` (str): A string representing the path of the folder containing the .fsa files.
+- `ladder` (str): A string representing the name of the ladder used for the fragment analysis.
+- `peak_model` (str): A string representing the peak model used for peak area calculations.
+- `min_height` (int, optional, default=100): Minimum peak height for inclusion in the analysis.
+- `cutoff` (int, optional, default=175): Cutoff value for peak area de-multiplexing.
+
+### Returns:
+
+- A Pandas dataframe containing the peak positions and their corresponding areas.
+
+### Example usage:
+
+```python
+peak_df = generate_peak_table(
+    folder="my_folder", ladder="LIZ", peak_model="gauss"
+)
+```
+This example will generate a dataframe containing the peak positions and their corresponding areas for all .fsa files in the my_folder directory, using the LIZ ladder and a Gaussian peak model.
+
+
+
 
 
 
