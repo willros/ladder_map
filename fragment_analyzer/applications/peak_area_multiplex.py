@@ -9,7 +9,7 @@ class PeakAreaDeMultiplexIterator:
     def __init__(self, number_of_assays):
         self.number_of_assays = number_of_assays
         self.current = 0
-        
+
     def __next__(self):
         if self.current >= self.number_of_assays:
             raise StopIteration
@@ -74,17 +74,17 @@ class PeakAreaDeMultiplex:
         # Change search_peaks_start to something else
         search_peaks_start: int = 110,
         # TODO
-        # Change the peak_height number to something else? 
+        # Change the peak_height number to something else?
         peak_height: int = 350,
         distance_between_assays: int = 15,
-        cutoff: float = None
+        cutoff: float = None,
     ) -> None:
         self.model = model
         self.raw_data = self.model.adjusted_baisepair_df
         self.file_name = self.model.fsa_file.file_name
         self.search_peaks_start = search_peaks_start
         self.cutoff = cutoff or None
-        
+
         # find peaks
         self.find_peaks_agnostic(
             peak_height=peak_height,
@@ -113,10 +113,9 @@ class PeakAreaDeMultiplex:
             # Print information to the user
             print(f"{self.peak_information.shape[0]} peaks found in {self.file_name}")
             print(f"{self.number_of_assays} assays in {self.file_name}")
-            
+
     def __iter__(self):
         return PeakAreaDeMultiplexIterator(self.number_of_assays)
-    
 
     def find_peaks_agnostic(
         self,
@@ -130,8 +129,7 @@ class PeakAreaDeMultiplex:
         peaks_index, _ = find_peaks(peaks_dataframe.peaks, height=peak_height)
 
         peak_information = (
-            peaks_dataframe
-            .iloc[peaks_index]
+            peaks_dataframe.iloc[peaks_index]
             .assign(peaks_index=peaks_index)
             .assign(peak_name=lambda x: range(1, x.shape[0] + 1))
             # separate the peaks into different assay groups depending on the distance
@@ -146,10 +144,7 @@ class PeakAreaDeMultiplex:
                 )
             )
             .fillna(method="ffill")
-            .assign(
-                max_peak=lambda x: x.groupby("assay")["peaks"]
-                .transform(np.max)
-            )
+            .assign(max_peak=lambda x: x.groupby("assay")["peaks"].transform(np.max))
             .assign(ratio=lambda x: x.peaks / x.max_peak)
             .loc[lambda x: x.ratio > min_ratio]
             .assign(peak_name=lambda x: range(1, x.shape[0] + 1))
@@ -239,14 +234,14 @@ class PeakAreaDeMultiplex:
         self.fit_report = fit_report
 
     def calculate_quotient(
-        self, 
+        self,
     ) -> None:
-        
+
         """
         :Params:
         """
         areas = np.array([x["amplitude"] for x in self.fit_params])
-        
+
         right_by_left = True
         if self.cutoff is not None:
             if pd.concat(self.fit_df).basepairs.mean() < self.cutoff:
@@ -302,7 +297,7 @@ class PeakAreaDeMultiplex:
         )
 
     def fit_assay_peaks(
-        self, 
+        self,
         peak_finding_model: str,
         assay_number: int,
     ) -> None:
@@ -313,8 +308,7 @@ class PeakAreaDeMultiplex:
         self.calculate_quotient()
         self.peak_position_area_dataframe(assay_number)
         return self.assay_peak_area_df
-    
-    
+
     def assays_dataframe(self, peak_finding_model: str = "gauss"):
         dfs = []
         for i in self:

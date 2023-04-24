@@ -215,7 +215,8 @@ def peak_area_report(
     min_interpeak_distance: int = 30,
     min_height: int = 100,
     min_ratio: float = 0.1,
-    trace_channel: str = "DATA1",
+    # changed to DATA9
+    trace_channel: str = "DATA9",
     search_peaks_start: int = 100,
     cutoff: float = None,
 ) -> int:

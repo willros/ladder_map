@@ -4,38 +4,60 @@ import fragment_analyzer
 
 
 def generate_peak_table(
-    folder: str, 
+    in_files: str | list,
     ladder: str, 
     peak_model: str,
     min_height: int = 100,
     cutoff: int = 175,
+    min_ratio: float = 0.3,
+    trace_channel: str = "DATA9",
 ) -> pd.DataFrame:
     """
-    Generates a combined dataframe of all peaks for files in the given folder.
+    Generate a combined dataframe of peaks for all input files.
 
-    :param folder: A string representing the path of the folder containing the .fsa files.
-    :param ladder: A string representing the name of the ladder used for the fragment analysis.
-    :param peak_model: A string representing the peak model used for peak area calculations.
-    :return: A Pandas dataframe containing the peak positions and their corresponding areas.
+    Args:
+        in_files (Union[str, List[str]]): Path(s) to the input .fsa files, or a directory containing them.
+        ladder (str): The ladder used for the fragment analysis.
+        peak_model (str): The peak model used for peak area calculations.
+        min_height (int, optional): The minimum peak height required for detection. Defaults to 100.
+        cutoff (int, optional): The cutoff value for peak area calculations. Defaults to 175.
+        min_ratio (float, optional): The minimum ratio required for peak detection. Defaults to 0.3.
+        trace_channel (str, optional): The channel used for trace data. Defaults to "DATA9".
 
-    The function reads all the .fsa files in the folder, and generates a combined dataframe
-    of all the peaks detected in each file using the specified ladder and peak model.
+    Returns:
+        pandas.DataFrame: A combined dataframe containing the peak positions and their corresponding areas.
 
-    ############ Example usage ############
+    Reads all the input .fsa files and generates a combined dataframe of all the peaks detected in each file using the 
+    specified ladder and peak model. If a directory is provided instead of specific file paths, all .fsa files within 
+    the directory will be used. Peak detection is based on the specified peak model and other optional parameters, 
+    such as minimum peak height and cutoff value. 
 
+    Example:
+    --------
     peak_df = generate_peak_table(
-        folder="my_folder", ladder="LIZ", peak_model="gauss"
+        in_files="my_folder", ladder="LIZ", peak_model="gauss"
     )
-    ############ End Example ##############
     """
-    files = [x for x in Path(folder).iterdir() if x.suffix == ".fsa"]
+    
+    if isinstance(in_files, str):
+        in_files = [x for x in Path(in_files).iterdir() if x.suffix == ".fsa"]
+        
     peak_dfs = []
-    for x in files:
+    for x in in_files:
         try:
-            fsa = fragment_analyzer.FsaFile(x, ladder, min_height=min_height)
+            fsa = fragment_analyzer.FsaFile(
+                x,
+                ladder,
+                min_height=min_height,
+                trace_channel=trace_channel
+            )
             pla = fragment_analyzer.PeakLadderAssigner(fsa)
             model = fragment_analyzer.FitLadderModel(pla)
-            pam = fragment_analyzer.PeakAreaDeMultiplex(model, cutoff=cutoff)
+            pam = fragment_analyzer.PeakAreaDeMultiplex(
+                model,
+                cutoff=cutoff, 
+                min_ratio=min_ratio
+            )
             peak_dfs.append(pam.assays_dataframe(peak_model))
         except:
             print(f"FAILED: {fsa.file_name}")
