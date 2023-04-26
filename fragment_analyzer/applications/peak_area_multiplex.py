@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 import numpy as np
 from scipy.signal import find_peaks, peak_widths
@@ -272,10 +273,13 @@ class PeakAreaDeMultiplex:
         """
         dataframes = []
         for i, _ in enumerate(self.fit_df):
+            report = self.fit_report[i]
+            r_value = float(re.findall(r"R-squared *= (0\.\d{3})", report)[0])
             df = (
                 self.fit_df[i]
                 .loc[lambda x: x.peaks == x.peaks.max()]
                 .assign(area=self.fit_params[i]["amplitude"])
+                .assign(r_value=r_value)
                 .assign(peak_name=f"Peak {i + 1}")
                 .drop(columns="time")
                 .reset_index(drop=True)

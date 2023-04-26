@@ -167,12 +167,7 @@ def generate_peak_area_report(
         textalign="left",
     )
     # Create dataframe
-    df = []
-    for i in peak_area:
-        peak_area.fit_assay_peaks(peak_model, i)
-        df.append(peak_area.assay_peak_area_df)
-
-    df = pd.concat(df).reset_index(drop=True)
+    df = peak_area.assays_dataframe(peak_model)
 
     # DataFrame Tabulator
     peaks_df_tab = pn.widgets.Tabulator(

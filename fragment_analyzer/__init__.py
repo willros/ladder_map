@@ -5,19 +5,19 @@ Easy Fragment Analyzing for python!
 
 __author__ = "William Rosenbaum and Pär Larsson"
 
-from fragment_analyzer.ladder_fitting.fit_ladder_model import FitLadderModel
-from fragment_analyzer.ladder_fitting.peak_ladder_assigner import PeakLadderAssigner
-from fragment_analyzer.ladders.ladders import LADDERS
-from fragment_analyzer.plotting.plot_ladder import PlotLadder
-from fragment_analyzer.utils.baseline_removal import baseline_arPLS
-from fragment_analyzer.utils.fsa_file import FsaFile
-from fragment_analyzer.applications.peak_area import PeakArea
-from fragment_analyzer.applications.peak_area_multiplex import PeakAreaDeMultiplex
-from fragment_analyzer.plotting.plot_peak_area import PlotPeakArea
-from fragment_analyzer.plotting.plot_raw_data import PlotRawData
-#from fragment_analyzer.reports.generate_report import generate_report
-from fragment_analyzer.reports.peak_area_report import peak_area_report
-from fragment_analyzer.functions.generate_peak_table import generate_peak_table
+from .ladder_fitting.fit_ladder_model import FitLadderModel
+from .ladder_fitting.peak_ladder_assigner import PeakLadderAssigner
+from .ladders.ladders import LADDERS
+from .plotting.plot_ladder import PlotLadder
+from .utils.baseline_removal import baseline_arPLS
+from .utils.fsa_file import FsaFile
+from .applications.peak_area import PeakArea
+from .applications.peak_area_multiplex import PeakAreaDeMultiplex
+from .plotting.plot_peak_area import PlotPeakArea
+from .plotting.plot_raw_data import PlotRawData
+#from.reports.generate_report import generate_report
+from .reports.peak_area_report import peak_area_report
+from .functions.generate_peak_table import generate_peak_table
 
 
 __all__ = [
@@ -36,3 +36,4 @@ __all__ = [
     "generate_peak_table",
     "peak_area_report",
 ]
+

@@ -9,3 +9,4 @@ lmfit
 panel
 build
 twine
+fire

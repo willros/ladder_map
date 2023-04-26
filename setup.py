@@ -8,7 +8,7 @@ setup(
     author="William Rosenbaum and Pär Larsson",
     author_email="william.rosenbaum@umu.se",
     license="MIT",
-    packages=["fragment_analyzer"],
+    packages=setuptools.find_packages(),
     install_requires=[
         "pandas",
         "numpy",
@@ -18,5 +18,8 @@ setup(
         "lmfit",
         "scipy",
         "biopython",
+        "fire",
     ],
+    #packages=setuptools.find_packages(exclude=["dist", "build", "*.egg-info", "tests"]),
+    entry_points={"console_scripts": ["fraggler=fragment_analyzer.cli:run"]},
 )
