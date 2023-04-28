@@ -60,6 +60,7 @@ def peak_table(
     cutoff: int = 175,
     min_ratio: float = 0.3,
     trace_channel: str = "DATA9",
+    excel: bool = False,
 ) -> pd.DataFrame:
     """
     Generate a combined dataframe of peaks for all input files.
@@ -104,7 +105,10 @@ def peak_table(
     df = pd.concat(peak_dfs).reset_index(drop=True)
 
     # Save combined dataframe as a CSV file
-    df.to_csv(f"{out_name}.csv", index=False)
+    if excel:
+        df.to_excel(f"{out_name}.xlsx", index=False)
+    else:
+        df.to_csv(f"{out_name}.csv", index=False)
 
 
 def run():
