@@ -214,6 +214,7 @@ def peak_area_report(
     trace_channel: str = "DATA9",
     search_peaks_start: int = 100,
     cutoff: float = None,
+    peak_height: int = 200,
 ) -> int:
     """
     Generates an HTML report for the fragment analysis of an FSA file, including peak area data and plots.
@@ -264,6 +265,7 @@ def peak_area_report(
         min_ratio=min_ratio,
         search_peaks_start=search_peaks_start,
         cutoff=cutoff,
+        peak_height=peak_height,
     )
     peak_plots = fragment_analyzer.PlotPeakArea(peak_areas)
 
