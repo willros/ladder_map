@@ -29,7 +29,7 @@ def report(
 
     # Log parameters
     print(f"Runned command:")
-    print(f"{" ".join(sys.argv)}")
+    print(f"{' '.join(sys.argv)}")
     print("")
     print("Generating report with the following parameters:")
     print(f"    In path: {in_path}")
@@ -77,10 +77,10 @@ def peak_table(
     """
     Generate a combined dataframe of peaks for all input files.
     """
-    
+
     # Logging
     print(f"Runned command:")
-    print(f"{" ".join(sys.argv)}")
+    print(f"{' '.join(sys.argv)}")
     print("")
     print("Generating peak table with the following parameters:")
     print(f"    In path: {in_path}")
@@ -92,7 +92,7 @@ def peak_table(
     print(f"    Cutoff: {cutoff}")
     print(f"    Trace channel: {trace_channel}")
     print(f"    Peak Height: {peak_height}")
-    
+
     # If in_path is a directory, get a list of all .fsa files in it
     if Path(in_path).is_dir():
         files = [x for x in Path(in_path).iterdir() if x.suffix == ".fsa"]
@@ -111,7 +111,10 @@ def peak_table(
             pla = fragment_analyzer.PeakLadderAssigner(fsa)
             model = fragment_analyzer.FitLadderModel(pla)
             pam = fragment_analyzer.PeakAreaDeMultiplex(
-                model, cutoff=cutoff, min_ratio=min_ratio, peak_height=peak_height,
+                model,
+                cutoff=cutoff,
+                min_ratio=min_ratio,
+                peak_height=peak_height,
             )
             peak_dfs.append(pam.assays_dataframe(peak_model))
         except Exception as e:
