@@ -1,6 +1,8 @@
 import fire
 import pandas as pd
 from pathlib import Path
+import traceback
+
 import fragment_analyzer
 
 
@@ -47,8 +49,10 @@ def report(
                 cutoff=cutoff,
                 trace_channel=trace_channel,
             )
-        except:
+        except Exception as e:
             print(f"ERROR: {file}")
+            print(traceback.format_exc())
+            print("")
 
 
 def peak_table(
@@ -98,8 +102,10 @@ def peak_table(
                 model, cutoff=cutoff, min_ratio=min_ratio
             )
             peak_dfs.append(pam.assays_dataframe(peak_model))
-        except:
-            print(f"FAILED: {file}")
+        except Exception as e:
+            print(f"ERROR: {file}")
+            print(traceback.format_exc())
+            print("")
 
     # Combine peak dataframes into a single dataframe
     df = pd.concat(peak_dfs).reset_index(drop=True)
