@@ -168,6 +168,11 @@ peak_df = generate_peak_table(
 This example will generate a dataframe containing the peak positions and their corresponding areas for all .fsa files in the my_folder directory, using the LIZ ladder and a Gaussian peak model.
 
 
+# TODO
+
+* Add log class instead of printing inside functions
+
+
 
 
 

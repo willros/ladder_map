@@ -11,7 +11,8 @@ from .ladders.ladders import LADDERS
 from .plotting.plot_ladder import PlotLadder
 from .utils.baseline_removal import baseline_arPLS
 from .utils.fsa_file import FsaFile
-from .applications.peak_area import PeakArea
+# TODO remove this later
+#from .applications.peak_area import PeakArea
 from .applications.peak_area_multiplex import PeakAreaDeMultiplex
 from .plotting.plot_peak_area import PlotPeakArea
 from .plotting.plot_raw_data import PlotRawData
@@ -29,11 +30,8 @@ __all__ = [
     "FsaFile",
     "PeakArea",
     "PeakAreaDemultiplex",
-    "PeakAreaMultiplex",
     "PlotPeakArea",
     "PlotRawData",
-    "generate_report",
     "generate_peak_table",
     "peak_area_report",
 ]
-

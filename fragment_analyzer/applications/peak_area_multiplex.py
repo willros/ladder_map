@@ -6,6 +6,61 @@ from lmfit.models import VoigtModel, GaussianModel, LorentzianModel
 from fragment_analyzer.ladder_fitting.fit_ladder_model import FitLadderModel
 
 
+### CUSTOM ERRORS ------
+class OverlappingIntervalError(Exception):
+    pass
+
+class WrongColumnsError(Exception):
+    pass
+
+######### -------------------- Validation functions ######### --------------------
+def is_overlapping(df: pd.DataFrame) -> bool:
+    test = (
+        df
+        .sort_values("start")
+        .assign(intervals=lambda x: [range(y.start, y.stop) for y in x.itertuples()])
+        .explode("intervals")
+    )
+
+    if test.shape[0] != test.intervals.nunique():
+        dups = (
+            test
+            .value_counts("intervals").reset_index()
+            .sort_values("intervals")
+            .loc[lambda x: x[0] > 1]
+            .iloc[0, 0]
+        )
+        print("NB!")
+        print(f"   Overlapping ranges!")
+        print(f"   Starting at value: {dups}")
+        print("Please look at your custom peaks table")
+        return True
+    return False
+
+def has_columns(df) -> bool:
+    columns = set(["name", "start", "stop", "amount"])
+    df_columns = set(df.columns)
+    
+    if len(columns) != len(df_columns):
+        print("Not the right columns")
+        print(f"Current columns: {df_columns}")
+        print(f"Needed columns: {columns}")
+        
+        return False
+    
+    intersection = columns.intersection(df_columns)
+    if len(intersection) != len(df_columns):
+        print("Not the right columns")
+        print(f"Current columns: {df_columns}")
+        print(f"Needed columns: {columns}")
+        
+        return False
+    
+    return True
+    
+#### ------------------------------------------------------------------------------------------------------------------------ ###
+        
+
 class PeakAreaDeMultiplexIterator:
     def __init__(self, number_of_assays):
         self.number_of_assays = number_of_assays
@@ -79,6 +134,7 @@ class PeakAreaDeMultiplex:
         peak_height: int = 350,
         distance_between_assays: int = 15,
         cutoff: float = None,
+        custom_peaks: str | pd.DataFrame = None,
     ) -> None:
         self.model = model
         self.raw_data = self.model.adjusted_baisepair_df
@@ -86,12 +142,17 @@ class PeakAreaDeMultiplex:
         self.search_peaks_start = search_peaks_start
         self.cutoff = cutoff or None
 
-        # find peaks
-        self.find_peaks_agnostic(
-            peak_height=peak_height,
-            min_ratio=min_ratio,
-            distance_between_assays=distance_between_assays,
-        )
+        # find peaks, custom or agnostic
+        if custom_peaks:
+            self.find_peaks_customized(
+                peak_height=peak_height, custom_peaks=custom_peaks
+            )
+        else:
+            self.find_peaks_agnostic(
+                peak_height=peak_height,
+                min_ratio=min_ratio,
+                distance_between_assays=distance_between_assays,
+            )
 
         # if no peaks could be found
         self.found_peaks = True
@@ -148,6 +209,73 @@ class PeakAreaDeMultiplex:
             .assign(max_peak=lambda x: x.groupby("assay")["peaks"].transform(np.max))
             .assign(ratio=lambda x: x.peaks / x.max_peak)
             .loc[lambda x: x.ratio > min_ratio]
+            .assign(peak_name=lambda x: range(1, x.shape[0] + 1))
+        )
+
+        # update peaks_index based on the above filtering
+        peaks_index = peak_information.peaks_index.to_numpy()
+
+        # update class attributes
+        self.peaks_index = peaks_index
+        self.peaks_dataframe = peaks_dataframe
+        self.peak_information = peak_information
+
+    # TODO
+    # Change this function to find peaks based on input from the user
+    # What kind of input for customized peaks? csv file --> pd.DataFrame
+    def find_peaks_customized(
+        self, peak_height: int, custom_peaks: str | pd.DataFrame
+    ) -> None:
+
+        # If custom peaks is a path to the custom peaks
+        if isinstance(custom_peaks, str):
+            custom_peaks = pd.read_csv(custom_peaks)
+        # If the user has not specified how many peaks the assay should include, put the nan to 0
+        custom_peaks = custom_peaks.fillna(0)
+        
+        # TODO
+        # Fix this crash
+        # VALIDATIONS
+        # MOVE THIS OUTSIDE THIS CLASS
+        if is_overlapping(custom_peaks):
+            raise OverlappingIntervalError("Overlapping intervals!")
+        
+        if not has_columns(custom_peaks):
+            raise WrongColumnsError("Wrong columns!")
+
+        # Filter where to start search for the peaks
+        peaks_dataframe = self.raw_data.loc[
+            lambda x: x.basepairs > self.search_peaks_start
+        ]
+        # Find the peaks
+        peaks_index, _ = find_peaks(peaks_dataframe.peaks, height=peak_height)
+
+        # Filter the df to get right peaks
+        peak_information = peaks_dataframe.iloc[peaks_index].assign(
+            peaks_index=peaks_index
+        )
+        # Filter the above df based on the custom peaks from the user
+        customized_peaks = []
+        for assay in custom_peaks.itertuples():
+            df = (
+                peak_information.loc[lambda x: x.basepairs > assay.start]
+                .loc[lambda x: x.basepairs < assay.stop]
+                .assign(assay=assay.name)
+            )
+
+            # Rank the peaks by height and filter out the smallest ones
+            if assay.amount != 0:
+                df = (
+                    df.assign(rank_peak=lambda x: x.peaks.rank(ascending=False))
+                    .loc[lambda x: x.rank_peak <= 5]
+                    .drop(columns=["rank_peak"])
+                )
+
+            customized_peaks.append(df)
+            
+        peak_information = (
+            pd.concat(customized_peaks)
+            .reset_index()
             .assign(peak_name=lambda x: range(1, x.shape[0] + 1))
         )
 
@@ -234,6 +362,8 @@ class PeakAreaDeMultiplex:
         self.fit_params = fit_params
         self.fit_report = fit_report
 
+    # TODO
+    # Fix so that the cutoff is a range or something else.
     def calculate_quotient(
         self,
     ) -> None:
