@@ -17,6 +17,7 @@ def report(
     cutoff: int = 175,
     trace_channel: str = "DATA9",
     peak_height: int = 200,
+    custom_peaks: str = None,
 ) -> None:
     """
     Generate a peak area report for all input files.
@@ -41,6 +42,8 @@ def report(
     print(f"    Cutoff: {cutoff}")
     print(f"    Trace channel: {trace_channel}")
     print(f"    Peak Height: {peak_height}")
+    if custom_peaks:
+        print(f"    Custom Peaks: {custom_peaks}")
 
     # Generate a peak area report for each file
     for file in files:
@@ -55,6 +58,7 @@ def report(
                 cutoff=cutoff,
                 trace_channel=trace_channel,
                 peak_height=peak_height,
+                custom_peaks=custom_peaks,
             )
         except Exception as e:
             print(f"ERROR: {file}")
@@ -72,6 +76,7 @@ def peak_table(
     min_ratio: float = 0.3,
     trace_channel: str = "DATA9",
     peak_height: int = 200,
+    custom_peaks: str = None,
     excel: bool = False,
 ) -> pd.DataFrame:
     """
@@ -92,6 +97,9 @@ def peak_table(
     print(f"    Cutoff: {cutoff}")
     print(f"    Trace channel: {trace_channel}")
     print(f"    Peak Height: {peak_height}")
+    if custom_peaks:
+        print(f"    Custom Peaks: {custom_peaks}")
+    
 
     # If in_path is a directory, get a list of all .fsa files in it
     if Path(in_path).is_dir():
@@ -115,6 +123,7 @@ def peak_table(
                 cutoff=cutoff,
                 min_ratio=min_ratio,
                 peak_height=peak_height,
+                custom_peaks=custom_peaks,
             )
             peak_dfs.append(pam.assays_dataframe(peak_model))
         except Exception as e:

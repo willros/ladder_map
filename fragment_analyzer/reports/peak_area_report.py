@@ -215,6 +215,7 @@ def peak_area_report(
     search_peaks_start: int = 100,
     cutoff: float = None,
     peak_height: int = 200,
+    custom_peaks: str = None,
 ) -> int:
     """
     Generates an HTML report for the fragment analysis of an FSA file, including peak area data and plots.
@@ -266,6 +267,7 @@ def peak_area_report(
         search_peaks_start=search_peaks_start,
         cutoff=cutoff,
         peak_height=peak_height,
+        custom_peaks=custom_peaks,
     )
     peak_plots = fragment_analyzer.PlotPeakArea(peak_areas)
 

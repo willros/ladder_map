@@ -6,7 +6,7 @@ from lmfit.models import VoigtModel, GaussianModel, LorentzianModel
 from fragment_analyzer.ladder_fitting.fit_ladder_model import FitLadderModel
 
 
-### CUSTOM ERRORS ------
+######### -------------------- Custom Errors ######### --------------------
 class OverlappingIntervalError(Exception):
     pass
 
