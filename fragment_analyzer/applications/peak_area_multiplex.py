@@ -267,7 +267,7 @@ class PeakAreaDeMultiplex:
             if assay.amount != 0:
                 df = (
                     df.assign(rank_peak=lambda x: x.peaks.rank(ascending=False))
-                    .loc[lambda x: x.rank_peak <= 5]
+                    .loc[lambda x: x.rank_peak <= assay.amount]
                     .drop(columns=["rank_peak"])
                 )
 
