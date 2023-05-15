@@ -11,6 +11,7 @@ def generate_peak_table(
     cutoff: int = 175,
     min_ratio: float = 0.3,
     trace_channel: str = "DATA9",
+    custom_peaks: str = None,
 ) -> pd.DataFrame:
     """
     Generate a combined dataframe of peaks for all input files.
@@ -56,7 +57,8 @@ def generate_peak_table(
             pam = fragment_analyzer.PeakAreaDeMultiplex(
                 model,
                 cutoff=cutoff, 
-                min_ratio=min_ratio
+                min_ratio=min_ratio,
+                custom_peaks=custom_peaks,
             )
             peak_dfs.append(pam.assays_dataframe(peak_model))
         except:

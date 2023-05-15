@@ -8,97 +8,18 @@ One difference is that combinations of peaks are generated using [NetworkX](http
 ## Install
 
 ```bash
-pip install peak-a-py
-
-conda install -c bioconda peak-a-py
+git clone git@github.com:willros/ladder_map.git && cd ladder_map
+pip install .
+```
+Or via conda:
+```
+conda install -c bioconda fraggler
 ```
 
 ## Usage
 
-The library exists of two main classes, namely `LadderMap` and `PeakArea`. 
-`LadderMap` matches ladders to peaks by correlation and stores peak and ladder information. The have methods to reassign timeseries data to basepair steps using linear regression. 
+LOOK AT tutorial.ipynb!!!!!!!
 
-`PeakArea` calculates peak area.
-
-### Example Usage
-
-#### Area under curve using naive integrals
-```python
-from fragment_analyzer.ladder_map import LadderMap, PeakArea
-
-data = "demo/4071_Dx 230113_PRT1_PRT3_rn/PRT3_NA18507_4071_D11_Dx.fsa"
-
-laddermap = LadderMap(data)
-
-peak_area = PeakArea(
-    laddermap.adjusted_step_dataframe(),
-    start=190, 
-    end=200,
-    rel_height=.97
-)
-
-peak_area.plot_peak_widths()
-```
-
-#### Output
-![peak_area](examples/peak_area.png)
-
-#### Visualization of best sample ladder peaks
-```python
-fig = laddermap.plot_best_sample_ladder()
-```
-#### Output
-![sample_ladder](examples/best_sample_ladder.png)
-
-#### Fitting model to the data
-##### Voigt Distribution
-```python
-peak_area.plot_lmfit_model("voigt")
-```
-#### Output
-![voigt_model](examples/voigt_model.png)
-
-##### Gauss Distribution
-```python
-peak_area.plot_lmfit_model("gauss")
-```
-#### Output
-![gauss_model](examples/gauss_model.png)
-
-
-#### Looking at more than two peaks
-```python
-peak_area = PeakArea(
-    laddermap.adjusted_step_dataframe(channel="DATA1"),
-    start=250, 
-    end=300,
-    num_peaks=4,
-    padding=2,
-    model="voigt"
-)
-
-
-peak_area.plot_lmfit_model()
-```
-The last peak is divided by the mean of the peaks to the left of it:
-#### Output
-![four_peaks](examples/four_peaks.png)
-
-#### If data needs baseline correction and normalization:
-```python
-laddermap = LadderMap(data, normalize_peaks=False)
-```
-Messy output
-#### Output
-![messy](examples/needs_normalization.png)
-
-#### Normalized data:
-```python
-laddermap = LadderMap(data, normalize_peaks=True)
-```
-Normalized peaks:
-#### Output
-![normalized](examples/normalized.png)
 
 
 ## Usage: peak_area_report
@@ -243,36 +164,6 @@ The `PeakAreaDeMultiplex` class provides the following methods:
 - `fit_peaks() -> None`: Fits peak models to the divided peaks.
 - `calculate_peak_quotients() -> None`: Calculates peak quotients based on the fitted peak models.
 
-## Usage Example
-
-```python
-# Import required libraries
-import pandas as pd
-from fragment_analyzer.ladder_fitting.fit_ladder_model import FitLadderModel
-from peak_area_demultiplex import PeakAreaDeMultiplex
-
-# Create FitLadderModel object
-data = pd.read_csv('data.csv')
-model = FitLadderModel(data)
-
-# Create PeakAreaDeMultiplex object
-demux = PeakAreaDeMultiplex(model, min_ratio=0.1, search_peaks_start=100, peak_height=300)
-
-# Find peaks
-demux.find_peaks()
-
-# Calculate peak widths
-demux.calculate_peak_widths()
-
-# Divide peaks
-demux.divide_peaks()
-
-# Fit peaks
-demux.fit_peaks()
-
-# Calculate peak quotients
-demux.calculate_peak_quotients()
-```
 
 
 
