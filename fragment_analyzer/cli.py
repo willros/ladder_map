@@ -42,8 +42,8 @@ def report(
     print(f"    Cutoff: {cutoff}")
     print(f"    Trace channel: {trace_channel}")
     print(f"    Peak Height: {peak_height}")
-    if custom_peaks:
-        print(f"    Custom Peaks: {custom_peaks}")
+    print(f"    Custom Peaks: {custom_peaks}")
+    print("")
 
     # Generate a peak area report for each file
     for file in files:
@@ -77,7 +77,7 @@ def peak_table(
     trace_channel: str = "DATA9",
     peak_height: int = 200,
     custom_peaks: str = None,
-    excel: bool = False,
+    excel: bool = True,
 ) -> pd.DataFrame:
     """
     Generate a combined dataframe of peaks for all input files.
@@ -97,8 +97,8 @@ def peak_table(
     print(f"    Cutoff: {cutoff}")
     print(f"    Trace channel: {trace_channel}")
     print(f"    Peak Height: {peak_height}")
-    if custom_peaks:
-        print(f"    Custom Peaks: {custom_peaks}")
+    print(f"    Custom Peaks: {custom_peaks}")
+    print("")
     
 
     # If in_path is a directory, get a list of all .fsa files in it

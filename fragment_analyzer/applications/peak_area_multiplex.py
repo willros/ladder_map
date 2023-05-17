@@ -35,6 +35,7 @@ def is_overlapping(df: pd.DataFrame) -> bool:
         print(f"   Overlapping ranges!")
         print(f"   Starting at value: {dups}")
         print("Please look at your custom peaks table")
+        print("")
         return True
     return False
 
@@ -47,6 +48,7 @@ def has_columns(df: pd.DataFrame) -> bool:
         print("Not the right columns")
         print(f"Current columns: {df_columns}")
         print(f"Needed columns: {columns}")
+        print("")
 
         return False
 
@@ -193,6 +195,7 @@ class PeakAreaDeMultiplex:
             print(
                 f"No peaks could be found in {self.file_name}. Please look at the raw data."
             )
+            print("")
         # if peaks are found
         else:
             self.found_peaks = True
@@ -207,6 +210,7 @@ class PeakAreaDeMultiplex:
             # Print information to the user
             print(f"{self.peak_information.shape[0]} peaks found in {self.file_name}")
             print(f"{self.number_of_assays} assays in {self.file_name}")
+            print("")
 
     def find_peaks_agnostic(
         self,

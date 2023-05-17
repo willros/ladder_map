@@ -1,18 +1,17 @@
 import matplotlib.pyplot as plt
-from fragment_analyzer.ladder_fitting.fit_ladder_model import FitLadderModel
+import fragment_analyzer
 
 
 class PlotRawData:
-    def __init__(self, model: FitLadderModel):
-        self.model = model
+    def __init__(self, fsa: fragment_analyzer.FsaFile):
+        self.fsa = fsa
 
     @property
     def plot_raw_data(self):
-        data = self.model.adjusted_baisepair_df
         fig = plt.figure(figsize=(20, 10))
 
-        plt.plot(data.basepairs, data.peaks)
-        plt.xlabel("Basepairs")
+        plt.plot(self.fsa.trace)
+        plt.xlabel("Time")
         plt.ylabel("Intensity")
 
         plt.close()

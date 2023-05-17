@@ -259,7 +259,7 @@ def peak_area_report(
     # LadderAssigner, Model and PeakArea
     ladder_assigner = fragment_analyzer.PeakLadderAssigner(fsa)
     model = fragment_analyzer.FitLadderModel(ladder_assigner)
-    raw_plots = fragment_analyzer.PlotRawData(model)
+    raw_plots = fragment_analyzer.PlotRawData(fsa)
     ladder_plots = fragment_analyzer.PlotLadder(model)
     peak_areas = fragment_analyzer.PeakAreaDeMultiplex(
         model,
