@@ -10,22 +10,23 @@ from fragment_analyzer.ladder_fitting.fit_ladder_model import FitLadderModel
 class OverlappingIntervalError(Exception):
     pass
 
+
 class WrongColumnsError(Exception):
     pass
+
 
 ######### -------------------- Validation functions ######### --------------------
 def is_overlapping(df: pd.DataFrame) -> bool:
     test = (
-        df
-        .sort_values("start")
+        df.sort_values("start")
         .assign(intervals=lambda x: [range(y.start, y.stop) for y in x.itertuples()])
         .explode("intervals")
     )
 
     if test.shape[0] != test.intervals.nunique():
         dups = (
-            test
-            .value_counts("intervals").reset_index()
+            test.value_counts("intervals")
+            .reset_index()
             .sort_values("intervals")
             .loc[lambda x: x[0] > 1]
             .iloc[0, 0]
@@ -37,29 +38,30 @@ def is_overlapping(df: pd.DataFrame) -> bool:
         return True
     return False
 
-def has_columns(df) -> bool:
+
+def has_columns(df: pd.DataFrame) -> bool:
     columns = set(["name", "start", "stop", "amount"])
     df_columns = set(df.columns)
-    
+
     if len(columns) != len(df_columns):
         print("Not the right columns")
         print(f"Current columns: {df_columns}")
         print(f"Needed columns: {columns}")
-        
+
         return False
-    
+
     intersection = columns.intersection(df_columns)
     if len(intersection) != len(df_columns):
         print("Not the right columns")
         print(f"Current columns: {df_columns}")
         print(f"Needed columns: {columns}")
-        
+
         return False
-    
     return True
-    
-#### ------------------------------------------------------------------------------------------------------------------------ ###
-        
+
+
+#### ---------------------------------------------------------------------------------- ###
+
 
 class PeakAreaDeMultiplexIterator:
     def __init__(self, number_of_assays):
@@ -75,6 +77,8 @@ class PeakAreaDeMultiplexIterator:
             return result
 
 
+# TOD# TODO
+# Fit peak model with x == time instead of x == bp?
 class PeakAreaDeMultiplex:
     """
     Class for finding peak areas and quotients of peaks in a given data set.
@@ -126,11 +130,7 @@ class PeakAreaDeMultiplex:
         self,
         model: FitLadderModel,
         min_ratio: float = 0.15,
-        # TODO
-        # Change search_peaks_start to something else
         search_peaks_start: int = 110,
-        # TODO
-        # Change the peak_height number to something else?
         peak_height: int = 350,
         distance_between_assays: int = 15,
         cutoff: float = None,
@@ -141,29 +141,61 @@ class PeakAreaDeMultiplex:
         self.file_name = self.model.fsa_file.file_name
         self.search_peaks_start = search_peaks_start
         self.cutoff = cutoff or None
+        self.peak_height = peak_height
+        self.min_ratio = min_ratio
+        self.distance_between_assays = distance_between_assays
+        self.custom_peaks = (
+            custom_peaks.fillna(0)
+            if isinstance(custom_peaks, pd.DataFrame)
+            else pd.read_csv(custom_peaks).fillna(0)
+            if isinstance(custom_peaks, str)
+            else None
+        )
 
+        # Validation of custom_peaks
+        self.run_validation()
         # find peaks, custom or agnostic
-        if custom_peaks:
+        self.find_peaks()
+        # continue whether peaks are found or not.
+        self.found_peaks()
+
+    def __iter__(self):
+        return PeakAreaDeMultiplexIterator(self.number_of_assays)
+
+    def run_validation(self):
+        if self.custom_peaks is None:
+            return
+
+        if is_overlapping(self.custom_peaks):
+            raise OverlappingIntervalError("Overlapping intervals!")
+            exit(1)
+
+        if not has_columns(self.custom_peaks):
+            raise WrongColumnsError("Wrong columns!")
+            exit(1)
+
+    def find_peaks(self):
+        if self.custom_peaks is not None:
             self.find_peaks_customized(
-                peak_height=peak_height, custom_peaks=custom_peaks
+                peak_height=self.peak_height,
             )
         else:
             self.find_peaks_agnostic(
-                peak_height=peak_height,
-                min_ratio=min_ratio,
-                distance_between_assays=distance_between_assays,
+                peak_height=self.peak_height,
+                min_ratio=self.min_ratio,
+                distance_between_assays=self.distance_between_assays,
             )
 
+    def found_peaks(self):
         # if no peaks could be found
-        self.found_peaks = True
         if self.peak_information.shape[0] == 0:
             self.found_peaks = False
             print(
                 f"No peaks could be found in {self.file_name}. Please look at the raw data."
             )
-
         # if peaks are found
-        if self.found_peaks:
+        else:
+            self.found_peaks = True
             # find peak widths
             self.find_peak_widths()
             # divade peaks based on their assay they belonging
@@ -175,9 +207,6 @@ class PeakAreaDeMultiplex:
             # Print information to the user
             print(f"{self.peak_information.shape[0]} peaks found in {self.file_name}")
             print(f"{self.number_of_assays} assays in {self.file_name}")
-
-    def __iter__(self):
-        return PeakAreaDeMultiplexIterator(self.number_of_assays)
 
     def find_peaks_agnostic(
         self,
@@ -220,28 +249,10 @@ class PeakAreaDeMultiplex:
         self.peaks_dataframe = peaks_dataframe
         self.peak_information = peak_information
 
-    # TODO
-    # Change this function to find peaks based on input from the user
-    # What kind of input for customized peaks? csv file --> pd.DataFrame
     def find_peaks_customized(
-        self, peak_height: int, custom_peaks: str | pd.DataFrame
+        self,
+        peak_height: int,
     ) -> None:
-
-        # If custom peaks is a path to the custom peaks
-        if isinstance(custom_peaks, str):
-            custom_peaks = pd.read_csv(custom_peaks)
-        # If the user has not specified how many peaks the assay should include, put the nan to 0
-        custom_peaks = custom_peaks.fillna(0)
-        
-        # TODO
-        # Fix this crash
-        # VALIDATIONS
-        # MOVE THIS OUTSIDE THIS CLASS
-        if is_overlapping(custom_peaks):
-            raise OverlappingIntervalError("Overlapping intervals!")
-        
-        if not has_columns(custom_peaks):
-            raise WrongColumnsError("Wrong columns!")
 
         # Filter where to start search for the peaks
         peaks_dataframe = self.raw_data.loc[
@@ -256,7 +267,7 @@ class PeakAreaDeMultiplex:
         )
         # Filter the above df based on the custom peaks from the user
         customized_peaks = []
-        for assay in custom_peaks.itertuples():
+        for assay in self.custom_peaks.itertuples():
             df = (
                 peak_information.loc[lambda x: x.basepairs > assay.start]
                 .loc[lambda x: x.basepairs < assay.stop]
@@ -272,7 +283,7 @@ class PeakAreaDeMultiplex:
                 )
 
             customized_peaks.append(df)
-            
+
         peak_information = (
             pd.concat(customized_peaks)
             .reset_index()
@@ -348,7 +359,8 @@ class PeakAreaDeMultiplex:
         for df in self.divided_peaks[assay_number]:
             df = df.copy()
             y = df.peaks.to_numpy()
-            x = df.basepairs.to_numpy()
+            # CHANGED to time instead of basepair
+            x = df.time.to_numpy()
 
             params = model.guess(y, x)
             out = model.fit(y, params, x=x)

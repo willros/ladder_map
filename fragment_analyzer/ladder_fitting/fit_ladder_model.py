@@ -11,6 +11,9 @@ import pandas as pd
 from fragment_analyzer.ladder_fitting.peak_ladder_assigner import PeakLadderAssigner
 from fragment_analyzer.utils.fsa_file import FsaFile
 
+class ModelFittingError(Exception):
+    pass
+
 
 class FitLadderModel:
     def __init__(self, ladder_assigner: PeakLadderAssigner) -> None:
@@ -23,6 +26,7 @@ class FitLadderModel:
         Returns:
             None.
         """
+        self.n_knots = 2
         self.ladder_assigner = ladder_assigner
         self.fsa_file = self.ladder_assigner.fsa_file
         self.best_combination = ladder_assigner.assign_ladder_peak_sizes().reshape(
@@ -69,17 +73,26 @@ class FitLadderModel:
         Returns:
             Dataframe with columns time, peaks and basepairs.
         """
-        df = (
-            pd.DataFrame({"peaks": self.fsa_file.trace})
-            .reset_index()
-            .rename(columns={"index": "time"})
-            .assign(
-                basepairs=lambda x: self.model.predict(x.time.to_numpy().reshape(-1, 1))
+        # Continue loop until all basepairs are unique by changing n_knots in SplineTransformer
+        for _ in range(10):
+            df = (
+                pd.DataFrame({"peaks": self.fsa_file.trace})
+                .reset_index()
+                .rename(columns={"index": "time"})
+                .assign(
+                    basepairs=lambda x: self.model.predict(x.time.to_numpy().reshape(-1, 1))
+                )
+                .loc[lambda x: x.basepairs >= 0]
             )
-            .loc[lambda x: x.basepairs >= 0]
-        )
-
-        return df
+        
+            if df.shape[0] == df.basepairs.nunique():
+                print(f"Ladder fitting model: {self.model}")
+                return df
+            # If not all bp are unique
+            self.n_knots += 1
+            self.fit_model()
+            
+        raise ModelFittingError("There is a problem with the fitting of the model to the ladder")
 
     def _fit_ROX_ladder(self) -> None:
         """
@@ -89,7 +102,7 @@ class FitLadderModel:
             None.
         """
         self.model = make_pipeline(
-            SplineTransformer(degree=4, n_knots=6, extrapolation="continue"),
+            SplineTransformer(degree=4, n_knots=self.n_knots + 4, extrapolation="continue"),
             LinearRegression(fit_intercept=True),
         )
 
@@ -105,8 +118,10 @@ class FitLadderModel:
         Returns:
             None.
         """
+        # NB!
+        # Changed the SplineTransformer(n_knots=2) instead of 3!!
         self.model = make_pipeline(
-            SplineTransformer(degree=3, n_knots=3, extrapolation="continue"),
+            SplineTransformer(degree=3, n_knots=self.n_knots, extrapolation="continue"),
             LinearRegression(fit_intercept=True),
         )
 
