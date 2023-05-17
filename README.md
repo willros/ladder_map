@@ -1,4 +1,4 @@
-## ladder map
+# Fraggler
 ![logo](examples/logo.png)
 
 Matches ladders to peaks by correlation for fragment analysis. The strategy resembles the one used by [Fragman](https://cran.r-project.org/web/packages/Fragman/index.html) for R.
@@ -18,153 +18,7 @@ conda install -c bioconda fraggler
 
 ## Usage
 
-LOOK AT tutorial.ipynb!!!!!!!
-
-
-
-## Usage: peak_area_report
-
-The `peak_area_report` function generates an HTML report for the fragment analysis of an FSA file, including peak area data and plots.
-
-### Parameters:
-
-- `fsa_file` (str): The path to the FSA file to be analyzed.
-- `ladder` (str): The name of the ladder used in the FSA file.
-- `folder` (str): The path to the output folder where the report will be saved.
-- `peak_model` (str): The peak finding model used to identify peaks.
-- `min_interpeak_distance` (int, optional, default=30): Minimum distance between peaks.
-- `min_height` (int, optional, default=100): Minimum peak height for inclusion in the analysis.
-- `min_ratio` (float, optional, default=0.1): Minimum peak area ratio for multiplexing.
-- `trace_channel` (str, optional, default="DATA1"): The trace channel in the FSA file.
-- `search_peaks_start` (int, optional, default=100): The starting point for peak search.
-- `cutoff` (float, optional): Cutoff value for peak area de-multiplexing.
-
-### Returns:
-
-- An integer representing the status of the report generation:
-  - 0 if successful
-  - 1 if no peaks were found
-
-### Raises:
-
-- FileNotFoundError: If the specified FSA file cannot be found.
-- IOError: If the report file cannot be saved.
-
-### Example usage:
-
-```python
-result = peak_area_report(
-    fsa_file="path/to/fsa_file.fsa",
-    ladder="LIZ",
-    folder="output_folder",
-    peak_model="gauss"
-)
-```
-This example will generate an HTML report for the fragment analysis of the specified FSA file, using the LIZ ladder and a Gaussian peak model. The report will be saved in the output_folder directory.
-
-
-## Usage: generate_peak_table
-
-The `generate_peak_table` function generates a combined dataframe of all peaks for .fsa files in the given folder, using the specified ladder and peak model.
-
-### Parameters:
-
-- `folder` (str): A string representing the path of the folder containing the .fsa files.
-- `ladder` (str): A string representing the name of the ladder used for the fragment analysis.
-- `peak_model` (str): A string representing the peak model used for peak area calculations.
-- `min_height` (int, optional, default=100): Minimum peak height for inclusion in the analysis.
-- `cutoff` (int, optional, default=175): Cutoff value for peak area de-multiplexing.
-
-### Returns:
-
-- A Pandas dataframe containing the peak positions and their corresponding areas.
-
-### Example usage:
-
-```python
-peak_df = generate_peak_table(
-    folder="my_folder", ladder="LIZ", peak_model="gauss"
-)
-```
-This example will generate a dataframe containing the peak positions and their corresponding areas for all .fsa files in the my_folder directory, using the LIZ ladder and a Gaussian peak model.
-
------------------------------------------------------------------------------------------------------------
-
-
-# Peak Area DeMultiplex
-
-The **PeakAreaDeMultiplex** class is designed for finding peak areas and quotients of peaks in a given data set. It provides methods for peak finding, peak width calculation, peak division by assay, fitting peak models, and calculating peak quotients.
-
-## Dependencies
-
-The project requires the following dependencies:
-
-- `re`
-- `pandas`
-- `numpy`
-- `scipy.signal.find_peaks`
-- `scipy.signal.peak_widths`
-- `lmfit.models.VoigtModel`
-- `lmfit.models.GaussianModel`
-- `lmfit.models.LorentzianModel`
-- `fragment_analyzer.ladder_fitting.fit_ladder_model.FitLadderModel`
-
-## Custom Errors
-
-The project includes two custom error classes:
-
-- `OverlappingIntervalError`: Raised when there are overlapping intervals in the custom peaks table.
-- `WrongColumnsError`: Raised when the input DataFrame does not have the required columns.
-
-## Validation Functions
-
-The project includes two validation functions:
-
-- `is_overlapping(df: pd.DataFrame) -> bool`: Checks if there are overlapping intervals in the DataFrame.
-- `has_columns(df) -> bool`: Checks if the DataFrame has the required columns.
-
-## PeakAreaDeMultiplex Class
-
-### Constructor
-
-The `PeakAreaDeMultiplex` class constructor takes the following parameters:
-
-- `model: FitLadderModel`: A `FitLadderModel` object containing the data set to be analyzed.
-- `min_ratio: float` (optional, default=0.15): The minimum ratio of peak height to highest peak height required to consider a peak as valid.
-- `search_peaks_start: int` (optional, default=110): The starting point in base pairs for the search for peaks.
-- `peak_height: int` (optional, default=350): The minimum peak height required to consider a peak as valid.
-- `distance_between_assays: int` (optional, default=15): The distance in base pairs between peaks to be considered as belonging to different assays.
-- `cutoff: float` (optional, default=None): The cutoff value for dividing peaks into left and right groups based on their base pair positions.
-- `custom_peaks: str | pd.DataFrame` (optional, default=None): Custom peaks data either as a path to a CSV file or a DataFrame.
-
-### Attributes
-
-The `PeakAreaDeMultiplex` class has the following attributes:
-
-- `model: FitLadderModel`: A `FitLadderModel` object containing the data set to be analyzed.
-- `raw_data: pd.DataFrame`: The raw data from the `FitLadderModel` object.
-- `file_name: str`: The name of the file associated with the `FitLadderModel` object.
-- `search_peaks_start: int`: The starting point in base pairs for the search for peaks.
-- `found_peaks: bool`: A flag indicating whether any peaks were found.
-- `peaks_index: np.ndarray`: An array of the indices of the peaks found.
-- `peaks_dataframe: pd.DataFrame`: A DataFrame of the peaks found, with base pairs and peak heights.
-- `peak_information: pd.DataFrame`: A DataFrame of the peaks found, with base pairs, peak heights, ratios, and peak names.
-- `peak_widths: pd.DataFrame`: A DataFrame of the peaks found, with base pairs, peak heights, start and end indices, and peak names.
-- `divided_peaks: List[pd.DataFrame]`: A list of DataFrames, each containing a single peak and its associated data.
-- `fit_df: List[pd.DataFrame]`: A list of DataFrames, each containing the fitted model parameters for a peak.
-- `peak_quotients: pd.DataFrame`: A DataFrame of the peak quotients calculated from the divided peaks.
-
-### Methods
-
-The `PeakAreaDeMultiplex` class provides the following methods:
-
-- `find_peaks() -> None`: Finds peaks in the raw data.
-- `calculate_peak_widths() -> None`: Calculates the widths of the peaks.
-- `divide_peaks() -> None`: Divides the peaks into left and right groups based on their base pair positions.
-- `fit_peaks() -> None`: Fits peak models to the divided peaks.
-- `calculate_peak_quotients() -> None`: Calculates peak quotients based on the fitted peak models.
-
-
+Look at `tutorial.ipynb`
 
 
 ## CLI Tool Example Usage:
@@ -199,9 +53,10 @@ The following flags can be used with the `fraggler report` command:
 - `--peak_height=PEAK_HEIGHT`: Type `int`. Specifies the peak height. Default value: 200.
 - `--custom_peaks=CUSTOM_PEAKS`: Type `Optional[str]`. Specifies custom peaks. Default value: None.
 
-
-
-
+#### Typical usage
+```console
+fraggler report folder report_folder --min_height=30 -t=DATA1 | tee log.txt
+```
 
 ### Fraggler peak_table
 
@@ -218,8 +73,8 @@ The fraggler peak_table command generates a combined peak_table for all input fi
 - If not specified, fraggler finds peaks agnostic in the `fsa file`. To specifiy custom assays with certain peaks and intervals, the user can add a .csv file to the `--custom_peaks` argument. The csv file MUST have the following shape:
 ```
 | name | start | stop | amount |
-|------|-------|------|--------|
-| prt1 | 140   | 150  |        |
+|---|---|---|---|
+| prt1 | 140 | 150 | 2 |
 
 ```
 If `amount` if left emtpy, `fraggler` will take all peaks inside the interval. If amount is not empty, fraggler will include the top `N` peaks in the interval, based on height.
@@ -243,6 +98,12 @@ The following flags can be used with the `fraggler peak_table` command:
 - `--custom_peaks=CUSTOM_PEAKS`: Type: `Optional[str]`, Default: None
 - `-e, --excel=EXCEL`: Type: `bool`, Default: False
 
+#### Typical usage
+```console
+fraggler peak_table folder peak_table --min_height=30 -t=DATA1 --excel=True --custom_peaks=peaks.csv | tee log.txt
+```
+
+---------------
 
 
 
