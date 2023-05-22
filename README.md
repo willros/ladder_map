@@ -1,9 +1,17 @@
 # Fraggler
 ![logo](examples/logo.png)
 
-Matches ladders to peaks by correlation for fragment analysis. The strategy resembles the one used by [Fragman](https://cran.r-project.org/web/packages/Fragman/index.html) for R.
+## Description
+Fraggler is a Python package that provides functionality for analyzing and generating reports for fsa files. It offers both a Python API and a command-line tool for ease of use.
 
-One difference is that combinations of peaks are generated using [NetworkX](https://networkx.org/) to eliminate impossible combinations. This reduces complexity substantially and allows for an exhaustive search to identify the best match.
+----------------
+
+**Features**
+`Peak Area Report Generation`: Fraggler allows you to generate peak area reports for all input files. The package calculates peak areas based on specified parameters and generates a report summarizing the results.
+
+`Combined Peak Table Generation`: Fraggler provides a command-line tool to generate a combined dataframe of peaks for all input files. This allows you to easily analyze and compare peaks across multiple files.
+
+`Customization Options`: Fraggler offers various customization options to tailor the analysis to your specific needs. You can specify parameters such as ladder type, peak model, minimum ratio, minimum height, cutoff value, trace channel, peak height, and even provide a custom peaks file for specific assays and intervals.
 
 ## Install
 
@@ -99,16 +107,15 @@ The following flags can be used with the `fraggler peak_table` command:
 
 #### Typical usage
 ```console
-fraggler peak_table folder peak_table --min_height=30 -t=DATA1 --excel=True --custom_peaks=peaks.csv 
+fraggler peak_table \
+fsa_folder \
+out_file \
+--min_height=30 \
+-t=DATA1 \
+--excel=True \
+--custom_peaks=peaks.csv 
 ```
 
----------------
-
-
-
-# TODO
-
-* Add log class instead of printing inside functions
 
 
 
