@@ -18,7 +18,7 @@ conda install -c bioconda fraggler
 
 ## Usage
 
-Look at `tutorial.ipynb`
+To get an overview how the library can be used in a python environment, please look at `tutorial.ipynb`.
 
 
 ## CLI Tool Example Usage:
