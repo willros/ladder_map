@@ -71,12 +71,11 @@ fraggler peak_table IN_PATH OUT_NAME <flags>
 The fraggler peak_table command generates a combined peak_table for all input files.
 
 - If not specified, fraggler finds peaks agnostic in the `fsa file`. To specifiy custom assays with certain peaks and intervals, the user can add a .csv file to the `--custom_peaks` argument. The csv file MUST have the following shape:
-```
+
 | name | start | stop | amount |
 |---|---|---|---|
 | prt1 | 140 | 150 | 2 |
 
-```
 If `amount` if left emtpy, `fraggler` will take all peaks inside the interval. If amount is not empty, fraggler will include the top `N` peaks in the interval, based on height.
 
 #### Positional Arguments
