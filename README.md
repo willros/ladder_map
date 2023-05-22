@@ -6,7 +6,7 @@ Fraggler is a Python package that provides functionality for analyzing and gener
 
 ----------------
 
-**Features**
+### Features
 `Peak Area Report Generation`: Fraggler allows you to generate peak area reports for all input files. The package calculates peak areas based on specified parameters and generates a report summarizing the results.
 
 `Combined Peak Table Generation`: Fraggler provides a command-line tool to generate a combined dataframe of peaks for all input files. This allows you to easily analyze and compare peaks across multiple files.
