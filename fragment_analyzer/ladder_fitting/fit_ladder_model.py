@@ -2,6 +2,7 @@
 Class to fit model to ladder and size standard
 """
 
+import logging
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import SplineTransformer
@@ -86,7 +87,7 @@ class FitLadderModel:
             )
         
             if df.shape[0] == df.basepairs.nunique():
-                print(f"Ladder fitting model: {self.model}")
+                logging.info(f"Ladder fitting model: {self.model}")
                 return df
             # If not all bp are unique
             self.n_knots += 1

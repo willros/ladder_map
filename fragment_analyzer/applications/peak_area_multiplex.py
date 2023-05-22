@@ -1,3 +1,4 @@
+import logging
 import re
 import pandas as pd
 import numpy as np
@@ -31,11 +32,10 @@ def is_overlapping(df: pd.DataFrame) -> bool:
             .loc[lambda x: x[0] > 1]
             .iloc[0, 0]
         )
-        print("NB!")
-        print(f"   Overlapping ranges!")
-        print(f"   Starting at value: {dups}")
-        print("Please look at your custom peaks table")
-        print("")
+        logging.warning(f"""
+        Customized peaks contains overlapping ranges
+        Starting at value: {dups}
+        """)
         return True
     return False
 
@@ -45,20 +45,22 @@ def has_columns(df: pd.DataFrame) -> bool:
     df_columns = set(df.columns)
 
     if len(columns) != len(df_columns):
-        print("Not the right columns")
-        print(f"Current columns: {df_columns}")
-        print(f"Needed columns: {columns}")
-        print("")
-
+        logging.warning(f"""
+        Customized peaks table does not containg the right columns.
+        Current columns: {df_columns}
+        Needed columns: {columns}
+        """)
         return False
 
     intersection = columns.intersection(df_columns)
     if len(intersection) != len(df_columns):
-        print("Not the right columns")
-        print(f"Current columns: {df_columns}")
-        print(f"Needed columns: {columns}")
-
+        logging.warning(f"""
+        Customized peaks table does not containg the right columns.
+        Current columns: {df_columns}
+        Needed columns: {columns}
+        """)
         return False
+    
     return True
 
 
@@ -192,10 +194,7 @@ class PeakAreaDeMultiplex:
         # if no peaks could be found
         if self.peak_information.shape[0] == 0:
             self.found_peaks = False
-            print(
-                f"No peaks could be found in {self.file_name}. Please look at the raw data."
-            )
-            print("")
+            logging.warning(f"No peaks could be found. Please look at raw data.")
         # if peaks are found
         else:
             self.found_peaks = True
@@ -207,10 +206,11 @@ class PeakAreaDeMultiplex:
             self.number_of_assays = len(self.divided_assays)
             # divide all peaks in each assay into separate dataframes
             self.divided_peaks = [self.divide_peaks(x) for x in self.divided_assays]
-            # Print information to the user
-            print(f"{self.peak_information.shape[0]} peaks found in {self.file_name}")
-            print(f"{self.number_of_assays} assays in {self.file_name}")
-            print("")
+            # logging
+            logging.info(f"""
+            Number of assays found: {self.number_of_assays}
+            Number of peaks found: {self.peak_information.shape[0]}
+            """)
 
     def find_peaks_agnostic(
         self,

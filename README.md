@@ -55,7 +55,7 @@ The following flags can be used with the `fraggler report` command:
 
 #### Typical usage
 ```console
-fraggler report folder report_folder --min_height=30 -t=DATA1 | tee log.txt
+fraggler report folder report_folder --min_height=30 -t=DATA1 
 ```
 
 ### Fraggler peak_table
@@ -99,7 +99,7 @@ The following flags can be used with the `fraggler peak_table` command:
 
 #### Typical usage
 ```console
-fraggler peak_table folder peak_table --min_height=30 -t=DATA1 --excel=True --custom_peaks=peaks.csv | tee log.txt
+fraggler peak_table folder peak_table --min_height=30 -t=DATA1 --excel=True --custom_peaks=peaks.csv 
 ```
 
 ---------------
